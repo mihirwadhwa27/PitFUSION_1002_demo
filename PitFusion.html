@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PitFusion &mdash; FRC Pit Display</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#09090f;--surface:#0f1018;--surface2:#161824;
+  --border:#1f2236;--border2:#2a2f4a;
+  --accent:#00d4ff;--accent2:#ff6b35;
+  --green:#00e676;--yellow:#ffd600;--red:#ff1744;
+  --blue-a:#1976d2;--red-a:#c62828;
+  --text:#eef0f8;--text-dim:#6b7899;--text-mid:#9ba8cc;
+  --fd:'Barlow Condensed',sans-serif;
+  --fb:'Barlow',sans-serif;
+  --fm:'Share Tech Mono',monospace;
+  --hdr-h:72px;--ftr-h:52px;
+  --fs-hero:clamp(2.8rem,5vw,4.5rem);
+  --fs-big:clamp(1.7rem,2.8vw,2.5rem);
+  --fs-lbl:clamp(0.85rem,1.3vw,1.2rem);
+  --fs-body:clamp(0.9rem,1.25vw,1.15rem);
+  --fs-sm:clamp(0.75rem,0.95vw,0.9rem);
+  --fs-hdr:clamp(1.05rem,1.6vw,1.5rem);
+  --fs-cd:clamp(1.7rem,3vw,2.7rem);
+  --pad:clamp(10px,1.3vw,20px);--r:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:var(--fs-body);-webkit-font-smoothing:antialiased}
+#app{display:grid;grid-template-rows:var(--hdr-h) 1fr var(--ftr-h);width:100vw;height:100vh;overflow:hidden}
+
+/* HEADER */
+.hdr{background:var(--surface);border-bottom:3px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 var(--pad);gap:12px;overflow:hidden}
+.hdr-l,.hdr-r{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.logo{font-family:var(--fd);font-size:var(--fs-hdr);font-weight:900;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.logo em{color:var(--accent);font-style:normal}
+.hdiv{width:2px;height:26px;background:var(--border2);flex-shrink:0}
+.hdr-ev{font-family:var(--fd);font-size:var(--fs-hdr);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:28vw}
+.hdr-cd{flex:1;display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden}
+.cd-pill{display:flex;align-items:center;gap:10px;background:rgba(255,214,0,.08);border:2px solid rgba(255,214,0,.3);border-radius:var(--r);padding:4px 16px;white-space:nowrap;overflow:hidden}
+.cd-lbl{font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;color:var(--yellow);flex-shrink:0}
+.cd-match{font-family:var(--fd);font-size:var(--fs-lbl);font-weight:600;color:var(--text-mid);overflow:hidden;text-overflow:ellipsis}
+.cd-val{font-family:var(--fd);font-size:var(--fs-cd);font-weight:900;color:var(--accent);line-height:1;letter-spacing:.03em;flex-shrink:0}
+.cd-val.urg{color:var(--red);animation:pulsered .8s infinite alternate}
+@keyframes pulsered{from{opacity:1}to{opacity:.4}}
+.hdr-team{background:var(--surface2);border:2px solid var(--accent);border-radius:var(--r);padding:3px 14px;font-family:var(--fd);font-size:var(--fs-hdr);font-weight:900;color:var(--accent);white-space:nowrap}
+.live-pill{display:flex;align-items:center;gap:6px;font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim)}
+.ldot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 7px var(--green);animation:blink 2s infinite}
+.ldot.off{background:var(--red);box-shadow:0 0 7px var(--red);animation:none}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.hdr-clk{font-family:var(--fm);font-size:var(--fs-hdr);color:var(--text-mid);white-space:nowrap}
+
+/* BODY */
+.body{display:grid;grid-template-columns:1fr 380px;overflow:hidden;min-height:0}
+.col-l{display:flex;flex-direction:column;border-right:2px solid var(--border);overflow:hidden;min-height:0}
+
+/* TOP ROW: stream + queuing side by side Change width of split here */
+.top-row{height: 65vh;flex-shrink:0;display:grid;grid-template-columns:75% 25%;border-bottom:2px solid var(--border)}
+
+/* STREAM */
+.stream-half{display:flex;flex-direction:column;border-right:2px solid var(--border);background:#000;overflow:hidden}
+.stream-bar{flex-shrink:0;background:var(--surface);border-bottom:2px solid var(--border);padding:5px var(--pad);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.stream-bar-l{display:flex;align-items:center;gap:8px}
+.s-lbl{font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-mid)}
+.s-live{display:flex;align-items:center;gap:4px;background:rgba(255,23,68,.14);border:2px solid rgba(255,23,68,.4);border-radius:4px;padding:2px 8px;font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.1em;color:var(--red)}
+.s-ldot{width:5px;height:5px;border-radius:50%;background:var(--red);animation:blink 1.2s infinite}
+.s-btn{background:var(--surface2);border:2px solid var(--border2);border-radius:4px;color:var(--text-dim);font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;padding:2px 9px;cursor:pointer;transition:all .15s}
+.s-btn:hover{color:var(--text);border-color:var(--text-mid)}
+.s-embed{flex:1;position:relative;min-height:0}
+.s-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
+.s-nowc{flex:1;display:flex;align-items:center;justify-content:center;font-size:var(--fs-sm);color:var(--text-dim);background:var(--surface);padding:var(--pad);text-align:center}
+
+/* QUEUING */
+.q-half{background:var(--bg);padding:var(--pad);overflow:hidden;display:flex;flex-direction:column;gap:7px}
+.sec-lbl{font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);flex-shrink:0}
+.now-q{font-family:var(--fd);font-size:var(--fs-hero);font-weight:900;color:var(--accent);line-height:.95;letter-spacing:-.01em}
+.not-q{font-family:var(--fd);font-size:var(--fs-big);font-weight:600;color:var(--text-dim)}
+.a-row{display:grid;grid-template-columns:1fr 30px 1fr;gap:7px;align-items:center}
+.a-blk{border-radius:var(--r);padding:7px 10px;display:flex;flex-direction:column;gap:2px}
+.a-blk.bl{background:rgba(25,118,210,.12);border:2px solid rgba(25,118,210,.5)}
+.a-blk.rd{background:rgba(198,40,40,.12);border:2px solid rgba(198,40,40,.5)}
+.a-label{font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:1px}
+.a-blk.bl .a-label{color:#64b5f6}
+.a-blk.rd .a-label{color:#ef9a9a}
+.a-team{font-family:var(--fd);font-size:var(--fs-big);font-weight:900;line-height:1.05;color:var(--text)}
+.a-team.me{color:var(--yellow);text-shadow:0 0 14px rgba(255,214,0,.5)}
+.vs{font-family:var(--fd);font-size:var(--fs-lbl);font-weight:900;color:var(--text-dim);text-align:center}
+.ss{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;flex-shrink:0}
+.sc{background:var(--surface);border:2px solid var(--border);border-radius:var(--r);padding:5px 7px;text-align:center}
+.sc-l{font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:2px}
+.sc-v{font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;color:var(--text)}
+.sc-v.on{color:var(--green)}
+
+/* MATCH LIST */
+.panel-m{flex:1;overflow-y:auto;padding:var(--pad);background:var(--bg);min-height:0;scroll-behavior:smooth}
+.panel-m::-webkit-scrollbar{width:4px}
+.panel-m::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.ml{display:flex;flex-direction:column;gap:4px}
+.msh{font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);padding:8px 0 4px;border-bottom:2px solid var(--border);margin-bottom:4px;display:flex;align-items:center;justify-content:space-between}
+.mc{background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:1px 7px;font-family:var(--fm);font-size:var(--fs-sm);color:var(--text-dim)}
+.mr{display:grid;grid-template-columns:155px 1fr auto auto;align-items:center;gap:9px;background:var(--surface);border:2px solid var(--border);border-radius:var(--r);padding:8px 13px;transition:border-color .2s;scroll-margin-top:6px}
+.mr.my{border-color:rgba(0,212,255,.4);background:rgba(0,212,255,.04)}
+.mr.act{border-color:var(--green);background:rgba(0,230,118,.06);box-shadow:0 0 14px rgba(0,230,118,.14)}
+.mr.dn{opacity:.45}
+.ml-lbl{font-family:var(--fd);font-size:var(--fs-body);font-weight:700;color:var(--text);white-space:nowrap}
+.ml-teams{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.chip{border-radius:4px;padding:2px 8px;font-family:var(--fm);font-size:var(--fs-sm);font-weight:600;border:2px solid;white-space:nowrap}
+.cb{background:rgba(25,118,210,.15);border-color:rgba(25,118,210,.5);color:#90caf9}
+.cr{background:rgba(198,40,40,.15);border-color:rgba(198,40,40,.5);color:#ef9a9a}
+.cm{background:rgba(255,214,0,.15);border-color:rgba(255,214,0,.6);color:var(--yellow);font-weight:900}
+.mscore{font-family:var(--fd);font-size:var(--fs-body);font-weight:700;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.scb{color:#64b5f6}.scr{color:#ef9a9a}.scs{color:var(--text-dim)}
+.mtime{font-family:var(--fm);font-size:var(--fs-sm);color:var(--text-dim);white-space:nowrap;text-align:right}
+.badge{font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:4px;border:2px solid;white-space:nowrap}
+.bq{background:rgba(0,212,255,.1);color:var(--accent);border-color:rgba(0,212,255,.35)}
+.bd{background:rgba(255,214,0,.1);color:var(--yellow);border-color:rgba(255,214,0,.35)}
+.bf{background:rgba(0,230,118,.1);color:var(--green);border-color:rgba(0,230,118,.35)}
+.bx{background:rgba(107,120,153,.08);color:var(--text-dim);border-color:var(--border)}
+
+/* SIDEBAR */
+.sidebar{display:flex;flex-direction:column;background:var(--bg);overflow:hidden;min-height:0}
+.tab-bar{flex-shrink:0;display:flex;background:var(--surface);border-bottom:2px solid var(--border)}
+.tab-btn{flex:1;padding:12px 6px;background:transparent;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;color:var(--text-dim);font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.tab-btn.act{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-btn:hover:not(.act){color:var(--text-mid)}
+.nbadge{display:inline-block;background:var(--red);color:#fff;border-radius:8px;padding:0 5px;font-size:var(--fs-sm);font-weight:700;margin-left:4px;vertical-align:middle;line-height:1.5}
+.tp{display:none;flex:1;overflow-y:auto;padding:var(--pad);min-height:0}
+.tp.act{display:block}
+.tp::-webkit-scrollbar{width:4px}
+.tp::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.rt{width:100%;border-collapse:collapse}
+.rt th{font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);padding:0 0 6px;text-align:left;border-bottom:2px solid var(--border)}
+.rt th:not(:first-child){text-align:right}
+.rt td{padding:5px 0;border-bottom:1px solid rgba(31,34,54,.8);font-size:var(--fs-body)}
+.rt td:not(:first-child){text-align:right;font-family:var(--fm);font-size:var(--fs-sm);color:var(--text-mid)}
+.rp{font-family:var(--fm);font-size:var(--fs-sm);color:var(--text-dim);min-width:28px;display:inline-block}
+.rn{font-family:var(--fd);font-weight:900;font-size:var(--fs-body);color:var(--text)}
+.rn.me{color:var(--yellow)}
+.rme{background:rgba(255,214,0,.04)}
+.ic{background:var(--surface2);border:2px solid var(--border2);border-radius:var(--r);padding:11px 13px;margin-bottom:9px}
+.it{font-family:var(--fd);font-size:var(--fs-lbl);font-weight:900;color:var(--text);margin-bottom:2px}
+.is{font-size:var(--fs-sm);color:var(--text-dim);margin-bottom:7px}
+.str{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:9px}
+.stc{background:var(--surface);border:2px solid var(--border);border-radius:6px;padding:6px;text-align:center}
+.stv{font-family:var(--fd);font-size:var(--fs-big);font-weight:900;line-height:1;color:var(--text)}
+.stv.ac{color:var(--accent)}.stv.gn{color:var(--green)}
+.stl{font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-top:2px}
+.sbl{font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim);padding:5px 0 4px;border-bottom:2px solid var(--border);margin-bottom:7px;margin-top:11px}
+.sbl:first-child{margin-top:0}
+.empty{text-align:center;padding:18px;color:var(--text-dim);font-size:var(--fs-body)}
+.skel{background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:5px;height:17px;margin-bottom:6px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* FOOTER */
+.footer{height:var(--ftr-h);background:var(--surface);border-top:3px solid var(--border);display:flex;align-items:center;padding:0 var(--pad);gap:20px;overflow:hidden}
+.ftr-stamp{font-family:var(--fm);font-size:var(--fs-sm);color:var(--text-dim);white-space:nowrap}
+.ftr-note{font-family:var(--fd);font-size:var(--fs-sm);color:var(--text-dim);white-space:nowrap;letter-spacing:.06em}
+
+/* BRACKET MODE */
+/* col-l becomes: stream strip (fixed height) | bracket (fills rest) */
+.col-l.bracket-mode {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Stream shrinks to a 16:9 strip at its natural aspect ratio */
+.stream-half.bracket-mode {
+  flex-shrink: 0;
+  height: 0;       /* will be set by JS based on width */
+}
+
+/* Bracket panel expands to fill all remaining col-l height */
+#bracket-panel.bracket-mode {
+  display: flex !important;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  padding: var(--pad);
+  background: var(--bg);
+  min-height: 0;
+}
+
+/* Bracket full-area: upper left, lower right, finals bottom */
+.bkt-full {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr auto;
+  gap: 10px;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.bkt-upper-area {
+  grid-column: 1; grid-row: 1;
+  display: flex; flex-direction: column;
+  min-height: 0; overflow: hidden;
+}
+
+.bkt-lower-area {
+  grid-column: 2; grid-row: 1;
+  display: flex; flex-direction: column;
+  min-height: 0; overflow: hidden;
+}
+
+.bkt-finals-area {
+  grid-column: 1 / 3; grid-row: 2;
+  display: flex; flex-direction: column;
+  flex-shrink: 0;
+}
+
+.bkt-rounds-fit {
+  display: grid;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.bkt-upper-area .bkt-rounds-fit { grid-template-columns: 4fr 2fr 1fr; }
+.bkt-lower-area .bkt-rounds-fit { grid-template-columns: 1fr 1fr 1fr; }
+.bkt-finals-area .bkt-rounds-fit {
+  grid-template-columns: repeat(3, auto);
+  justify-content: center;
+  flex: none;
+}
+
+.bkt-col-fit {
+  display: flex; flex-direction: column;
+  gap: 5px; min-height: 0; overflow: hidden;
+}
+
+.bkt-col-fit .bkt-match { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.bkt-col-fit .bkt-alliance { flex: 1; min-height: 0; }
+
+/* BRACKET */
+#bracket-panel{padding:var(--pad);background:var(--bg)}
+.bkt-wrap{display:flex;flex-direction:column;gap:12px;min-width:0}
+.bkt-section-hdr{font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);padding:6px 0 4px;border-bottom:2px solid var(--border);margin-bottom:6px}
+.bkt-rounds{display:flex;gap:10px;align-items:flex-start;overflow-x:auto;padding-bottom:4px}
+.bkt-rounds::-webkit-scrollbar{height:4px}
+.bkt-rounds::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.bkt-col{display:flex;flex-direction:column;gap:8px;min-width:160px;flex-shrink:0}
+.bkt-col-hdr{font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);text-align:center;margin-bottom:2px}
+.bkt-match{background:var(--surface);border:2px solid var(--border);border-radius:var(--r);overflow:hidden;min-width:160px}
+.bkt-match.bkt-active{border-color:var(--green);box-shadow:0 0 12px rgba(0,230,118,.2)}
+.bkt-match.bkt-my{border-color:rgba(0,212,255,.5)}
+.bkt-match-lbl{font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);padding:3px 8px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.bkt-score-pill{font-family:var(--fm);font-size:var(--fs-sm);color:var(--text-mid)}
+.bkt-alliance{display:flex;align-items:center;gap:6px;padding:5px 8px;border-bottom:1px solid var(--border)}
+.bkt-alliance:last-child{border-bottom:none}
+.bkt-alliance.bkt-winner{background:rgba(0,230,118,.06)}
+.bkt-alliance.bkt-loser{opacity:.55}
+.bkt-seed{font-family:var(--fd);font-size:var(--fs-sm);font-weight:900;color:var(--text-dim);min-width:20px;flex-shrink:0}
+.bkt-seed.blue-seed{color:#64b5f6}.bkt-seed.red-seed{color:#ef9a9a}
+.bkt-teams{font-family:var(--fd);font-size:var(--fs-body);font-weight:700;color:var(--text);flex:1;line-height:1.15}
+.bkt-teams.bkt-my-team{color:var(--yellow)}
+.bkt-pts{font-family:var(--fm);font-size:var(--fs-sm);font-weight:700;color:var(--text-mid);min-width:30px;text-align:right;flex-shrink:0}
+.bkt-pts.bkt-winner-pts{color:var(--green)}
+.bkt-tbd{color:var(--text-dim);font-style:italic}
+.bkt-empty{background:var(--surface2);border:2px dashed var(--border2);border-radius:var(--r);padding:10px 8px;text-align:center;font-family:var(--fd);font-size:var(--fs-sm);color:var(--text-dim);letter-spacing:.06em}
+.bkt-finals-wrap{display:flex;justify-content:center;margin-top:4px}
+.bkt-finals-card{min-width:220px;max-width:280px}
+
+/* LOADING */
+#lo{position:fixed;inset:0;background:rgba(9,9,15,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999}
+.spinner{width:50px;height:50px;border:4px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ltxt{font-family:var(--fd);font-size:var(--fs-lbl);letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim)}
+
+/* SETUP PAGE */
+#setup-page{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10000;padding:20px}
+#setup-page.hidden{display:none}
+.setup-card{background:var(--surface);border:2px solid var(--border2);border-radius:12px;padding:36px 40px;width:100%;max-width:520px;display:flex;flex-direction:column;gap:22px}
+.setup-logo-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:4px}
+.setup-logo-img{max-height:80px;max-width:240px;object-fit:contain;display:none}
+.setup-logo-img.loaded{display:block}
+.setup-wordmark{font-family:var(--fd);font-size:2.8rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;line-height:1}
+.setup-wordmark em{color:var(--accent);font-style:normal}
+.setup-sub{font-family:var(--fd);font-size:var(--fs-lbl);color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase}
+.setup-field{display:flex;flex-direction:column;gap:6px}
+.setup-label{font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim)}
+.setup-input{background:var(--surface2);border:2px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--fm);font-size:var(--fs-body);padding:10px 14px;outline:none;transition:border-color .15s;width:100%}
+.setup-input:focus{border-color:var(--accent)}
+.setup-input::placeholder{color:var(--text-dim)}
+.setup-select{background:var(--surface2);border:2px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--fm);font-size:var(--fs-body);padding:10px 14px;outline:none;transition:border-color .15s;width:100%;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7899' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.setup-select:focus{border-color:var(--accent)}
+.setup-select option{background:var(--surface2);color:var(--text)}
+.setup-hint{font-family:var(--fd);font-size:var(--fs-sm);color:var(--text-dim);margin-top:2px}
+.setup-or{display:flex;align-items:center;gap:10px;color:var(--text-dim);font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.setup-or::before,.setup-or::after{content:'';flex:1;height:1px;background:var(--border2)}
+.setup-btn{background:var(--accent);border:none;border-radius:var(--r);color:#000;font-family:var(--fd);font-size:var(--fs-lbl);font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:13px 20px;cursor:pointer;transition:opacity .15s;width:100%}
+.setup-btn:hover{opacity:.85}
+.setup-btn:disabled{opacity:.4;cursor:not-allowed}
+.setup-events-loading{display:flex;align-items:center;gap:8px;font-family:var(--fd);font-size:var(--fs-sm);color:var(--text-dim)}
+.setup-spinner{width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+.setup-err{font-family:var(--fd);font-size:var(--fs-sm);color:var(--red);margin-top:2px;display:none}
+
+.bumper-box {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: var(--r);
+    font-family: var(--fd);
+    font-size: var(--fs-big);
+    font-weight: 900;
+    text-align: center;
+    background: var(--surface2);
+    border: 2px solid var(--border2);
+    color: var(--text);
+}
+.bumper-red {
+    background: rgba(198, 40, 40, 0.20);
+    border-color: rgba(198, 40, 40, 0.55);
+    color: var(--red);
+}
+.bumper-blue {
+    background: rgba(25,118,210,0.20);
+    border-color: rgba(25,118,210,0.55);
+    color: var(--blue-a);
+}
+
+
+</style>
+</head>
+<body>
+
+<!-- SETUP PAGE -->
+<div id="setup-page">
+  <div class="setup-card">
+    <div class="setup-logo-wrap">
+      <img id="setup-logo-img" class="setup-logo-img" alt="Team Logo">
+      <div class="setup-wordmark">Pit<em>Fusion</em></div>
+      <div class="setup-sub">FRC Pit Display</div>
+    </div>
+
+    <div class="setup-field">
+      <label class="setup-label" for="setup-team">Team Number</label>
+      <input class="setup-input" id="setup-team" type="number" placeholder="e.g. 254" min="1" max="99999" autocomplete="off">
+    </div>
+
+    <div class="setup-field">
+      <label class="setup-label" for="setup-event-dropdown">This Week&rsquo;s Events</label>
+      <div id="setup-events-status" class="setup-events-loading">
+        <div class="setup-spinner"></div><span>Fetching events&hellip;</span>
+      </div>
+      <select class="setup-select" id="setup-event-dropdown" style="display:none">
+        <option value="">— Select an event —</option>
+      </select>
+      <div class="setup-hint" id="setup-event-hint" style="display:none"></div>
+    </div>
+
+    <div class="setup-or">or enter manually</div>
+
+    <div class="setup-field">
+      <label class="setup-label" for="setup-event-manual">Event Code <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+      <input class="setup-input" id="setup-event-manual" type="text" placeholder="e.g. 2026mabos" autocomplete="off" spellcheck="false">
+      <div class="setup-hint">Overrides the dropdown selection above</div>
+      <div class="setup-err" id="setup-err">Please enter a team number and select or type an event code.</div>
+    </div>
+
+    <button class="setup-btn" id="setup-go" onclick="setupLaunch()">Launch PitFusion &rarr;</button>
+  </div>
+</div>
+
+<div id="lo" style="display:none"><div class="spinner"></div><div class="ltxt">Loading event data&hellip;</div></div>
+
+<div id="app">
+  <div class="hdr">
+    <div class="hdr-l">
+      <div class="logo">Pit<em>Fusion</em></div>
+      <div class="hdiv"></div>
+      <div class="hdr-ev" id="hdr-ev">&mdash;</div>
+    </div>
+    <div class="hdr-cd" id="hdr-cd"></div>
+    <div class="hdr-r">
+      <div class="hdr-clk" id="hdr-clk">&mdash;</div>
+      <div id="hdr-delay" style="font-family:var(--fm);font-size:var(--fs-sm);color:var(--text-dim);white-space:nowrap"></div>
+      <div class="hdr-team" id="hdr-team">&mdash;</div>
+      <div class="live-pill"><div class="ldot" id="ldot"></div><span id="ltxt">Live</span></div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="col-l">
+      <div class="top-row" id="top-row">
+
+        <!-- Stream -->
+        <div class="stream-half" id="stream-half">
+          <div class="stream-bar">
+            <div class="stream-bar-l">
+              <span class="s-lbl" id="s-title">Livestream</span>
+              <!--<div class="s-live"><div class="s-ldot"></div>LIVE</div>-->
+              <select id="s-sel" onchange="switchStream(this.value)" style="display:none;background:var(--surface2);border:2px solid var(--border2);color:var(--text-dim);font-family:var(--fm);font-size:var(--fs-sm);padding:2px 6px;border-radius:4px;cursor:pointer;outline:none"></select>
+            </div>
+            <button class="s-btn" id="stream-hide-btn" style="display:none"></button>
+          </div>
+          <div class="s-embed" id="s-embed"><iframe id="s-iframe" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>
+          <div class="s-nowc" id="s-nowc" style="display:none">No livestream found for this event</div>
+        </div>
+
+        <!-- Queuing -->
+        <div class="q-half">
+          <div class="sec-lbl">Queuing Status</div>
+          <div id="q-display"></div>
+          <div id="bumper-box" class="bumper-box">&mdash;</div>
+        </div>
+
+      </div>
+
+      <div class="panel-m" id="panel-m">
+        <div style="margin-bottom:7px">
+          <div class="sec-lbl" id="panel-m-title">Match Schedule</div>
+        </div>
+        <div class="ml" id="ml"></div>
+        <div id="bracket-panel" style="display:none;height:100%;overflow:hidden"></div>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="tab-bar">
+        <button class="tab-btn act" onclick="switchTab('rankings',this)">Rankings</button>
+        <button class="tab-btn" onclick="switchTab('team',this)">My Team</button>
+        <button class="tab-btn" onclick="switchTab('alerts',this)">Alerts <span id="abadge" class="nbadge" style="display:none">0</span></button>
+      </div>
+      <div class="tp act" id="tab-rankings">
+        <div class="sbl" style="margin-top:0">Event Rankings</div>
+        <div id="rank-content"><div class="skel" style="width:100%"></div><div class="skel" style="width:78%"></div><div class="skel" style="width:88%"></div></div>
+      </div>
+      <div class="tp" id="tab-team"><div id="team-content"></div></div>
+      <div class="tp" id="tab-alerts">
+        <div class="sbl" style="margin-top:0">Announcements</div>
+        <div id="ann-content"><div class="empty">No announcements</div></div>
+        <div class="sbl">Parts Requests</div>
+        <div id="parts-content"><div class="empty">No active parts requests</div></div>
+      </div>
+      <!-- Queuing tab — only visible in bracket mode -->
+      <div class="tp" id="tab-queuing" style="display:none">
+        <div id="q-display-sidebar"></div>
+        <div id="bumper-box-sidebar" class="bumper-box" style="margin-top:10px">&mdash;</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="ftr-note">Nexus refreshes every 15s &middot; TBA refreshes every 30s</div>
+    <div style="flex:1"></div>
+    <button class="s-btn" id="stream-toggle-btn" onclick="toggleStreamVisibility()" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">📺 Hide Stream</button>
+    <button class="s-btn" id="bracket-toggle-btn" onclick="toggleBracket()" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">🏆 Playoff Bracket</button>
+    <div class="ftr-stamp" id="tk-stamp">&mdash;</div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// API KEYS (keep these; team/event now come from setup page)
+// ============================================================
+const NEXUS_KEY = 'YOUR_NEXUS KEY';
+const TBA_KEY   = 'YOUR_TBA_KEY';
+// ============================================================
+
+const C={team:'',event:'',nexus:NEXUS_KEY,tba:TBA_KEY};
+
+// ── SETUP PAGE ───────────────────────────────────────────────────────────────
+
+const LS_TEAM  = 'pitfusion_team';
+const LS_EVENT = 'pitfusion_event';
+
+// Try to show a logo.png/logo.jpg from the same directory as this .html file
+(function tryLoadLogo(){
+  const img = document.getElementById('setup-logo-img');
+  const exts = ['logo.png','logo.jpg','logo.jpeg','logo.svg','logo.webp'];
+  let idx = 0;
+  function next(){
+    if(idx>=exts.length) return;
+    img.onerror = ()=>{ idx++; next(); };
+    img.onload  = ()=>{ img.classList.add('loaded'); };
+    img.src = exts[idx++];
+  }
+  next();
+})();
+
+// Restore saved values
+(function restoreSaved(){
+  const t = localStorage.getItem(LS_TEAM);
+  const ev = localStorage.getItem(LS_EVENT);
+  if(t)  document.getElementById('setup-team').value  = t;
+  if(ev) document.getElementById('setup-event-manual').value = ev;
+})();
+
+// ── EVENT DROPDOWN — team-aware filtering ────────────────────────────────────
+
+let _allWeekEvents = [];   // all this-week events, fetched once
+let _teamFilterTimer = null;
+
+// Fetch all this-week events on load; populate dropdown (unfiltered to start)
+(async function loadWeeklyEvents(){
+  const statusEl = document.getElementById('setup-events-status');
+  const dropEl   = document.getElementById('setup-event-dropdown');
+  const hintEl   = document.getElementById('setup-event-hint');
+  try {
+    const now  = new Date();
+    const year = now.getFullYear();
+    const res  = await fetch(`https://www.thebluealliance.com/api/v3/events/${year}/simple`,
+      { headers:{ 'X-TBA-Auth-Key': TBA_KEY } });
+    if(!res.ok) throw new Error('TBA error');
+    const events = await res.json();
+
+    const todayMs   = new Date().setHours(0,0,0,0);
+    const windowEnd = todayMs + 7 * 86400000;
+    _allWeekEvents  = events
+      .filter(ev => {
+        if(!ev.start_date || !ev.end_date) return false;
+        const start = new Date(ev.start_date + 'T00:00:00').getTime();
+        const end   = new Date(ev.end_date   + 'T23:59:59').getTime();
+        return end >= todayMs && start <= windowEnd;
+      })
+      .sort((a,b) => a.name.localeCompare(b.name));
+
+    statusEl.style.display = 'none';
+    dropEl.style.display   = 'block';
+
+    // Populate with all events; team filtering will narrow this down
+    populateDropdown(_allWeekEvents, null);
+
+    // If we have a saved event key, try to pre-select it
+    const savedEv = localStorage.getItem(LS_EVENT);
+    if(savedEv){
+      const opt = dropEl.querySelector(`option[value="${savedEv}"]`);
+      if(opt){ dropEl.value = savedEv; document.getElementById('setup-event-manual').value = ''; }
+    }
+
+    // If a team number is already filled in (restored from localStorage), filter immediately
+    const savedTeam = document.getElementById('setup-team').value.trim();
+    if(savedTeam) filterDropdownForTeam(savedTeam);
+
+  } catch(err){
+    document.getElementById('setup-events-status').innerHTML =
+      '<span style="color:var(--text-dim)">Could not load events — enter code manually below</span>';
+  }
+})();
+
+function populateDropdown(evList, teamNum){
+  const dropEl  = document.getElementById('setup-event-dropdown');
+  const hintEl  = document.getElementById('setup-event-hint');
+  const savedEv = dropEl.value; // preserve current selection across repopulates
+
+  if(!evList.length){
+    dropEl.innerHTML = '<option value="">— No events this week —</option>';
+    hintEl.textContent = teamNum
+      ? `No events this week found for team ${teamNum}. Showing all events — or enter a code manually.`
+      : 'No FRC events found this week. Use the manual entry below.';
+    hintEl.style.display = 'block';
+    return;
+  }
+
+  dropEl.innerHTML = `<option value="">— Select an event —</option>` +
+    evList.map(ev =>
+      `<option value="${ev.key}">${ev.name} (${ev.key})</option>`
+    ).join('');
+
+  if(teamNum){
+    const matched = evList.length;
+    const total   = _allWeekEvents.length;
+    hintEl.textContent = matched < total
+      ? `${matched} event${matched!==1?'s':''} this week for team ${teamNum}`
+      : `${matched} event${matched!==1?'s':''} this week (team ${teamNum} not found in any — showing all)`;
+  } else {
+    hintEl.textContent = `${evList.length} event${evList.length!==1?'s':''} found this week`;
+  }
+  hintEl.style.display = 'block';
+
+  // Restore previous selection if it's still in the new list
+  if(savedEv && dropEl.querySelector(`option[value="${savedEv}"]`)){
+    dropEl.value = savedEv;
+  }
+}
+
+async function filterDropdownForTeam(teamNum){
+  if(!teamNum || !_allWeekEvents.length){ populateDropdown(_allWeekEvents, null); return; }
+
+  const hintEl = document.getElementById('setup-event-hint');
+  hintEl.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px"><span class="setup-spinner"></span>Checking events for team ${teamNum}…</span>`;
+  hintEl.style.display = 'block';
+
+  try {
+    const year = new Date().getFullYear();
+    const res  = await fetch(
+      `https://www.thebluealliance.com/api/v3/team/frc${teamNum}/events/${year}/simple`,
+      { headers:{ 'X-TBA-Auth-Key': TBA_KEY } }
+    );
+
+    if(!res.ok) throw new Error('not found');
+    const teamEvents = await res.json();
+    const teamKeys   = new Set(teamEvents.map(e => e.key));
+
+    // Filter this-week events down to ones the team is registered for
+    const filtered = _allWeekEvents.filter(ev => teamKeys.has(ev.key));
+
+    if(filtered.length > 0){
+      populateDropdown(filtered, teamNum);
+      // Auto-select if exactly one match
+      if(filtered.length === 1){
+        document.getElementById('setup-event-dropdown').value = filtered[0].key;
+        // Clear manual field so auto-selection isn't overridden
+        if(!document.getElementById('setup-event-manual').value)
+          document.getElementById('setup-event-dropdown').dispatchEvent(new Event('change'));
+      }
+    } else {
+      // Team found on TBA but not at any event this week — fall back to all events
+      populateDropdown(_allWeekEvents, teamNum);
+    }
+  } catch(err){
+    // Team not found or network error — fall back gracefully to all events
+    populateDropdown(_allWeekEvents, null);
+  }
+}
+
+// Debounced listener on team number input
+document.getElementById('setup-team').addEventListener('input', function(){
+  clearTimeout(_teamFilterTimer);
+  const val = this.value.trim();
+  if(!val){ populateDropdown(_allWeekEvents, null); return; }
+  _teamFilterTimer = setTimeout(() => filterDropdownForTeam(val), 600);
+});
+
+function setupLaunch(){
+  const teamInput = document.getElementById('setup-team').value.trim();
+  const dropVal   = document.getElementById('setup-event-dropdown').value.trim();
+  const manualVal = document.getElementById('setup-event-manual').value.trim().toLowerCase();
+  const errEl     = document.getElementById('setup-err');
+
+  const eventKey = manualVal || dropVal;
+
+  if(!teamInput || !eventKey){
+    errEl.textContent = !teamInput
+      ? 'Please enter a team number.'
+      : 'Please select an event from the dropdown or enter an event code manually.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  errEl.style.display = 'none';
+
+  localStorage.setItem(LS_TEAM,  teamInput);
+  localStorage.setItem(LS_EVENT, eventKey);
+
+  C.team  = teamInput;
+  C.event = eventKey;
+
+  document.getElementById('setup-page').classList.add('hidden');
+  document.getElementById('lo').style.display = 'flex';
+  init();
+}
+
+// Allow pressing Enter in inputs to launch
+['setup-team','setup-event-manual'].forEach(id=>{
+  document.getElementById(id).addEventListener('keydown', e=>{ if(e.key==='Enter') setupLaunch(); });
+});
+let nxData=null,tbaMx=null,tbaRk=null,tbaTi=null,tbaWc=null,tbaAlliances=null;
+let stHidden=false,stIdx=0,cdTick=null,bracketView=false;
+
+// Clock
+setInterval(()=>{document.getElementById('hdr-clk').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});},1000);
+
+// API
+const hn=k=>({'Nexus-Api-Key':k});
+const ht=k=>({'X-TBA-Auth-Key':k});
+async function get(url,h){const r=await fetch(url,{headers:h});if(!r.ok)throw r.status;return r.json();}
+
+async function fNexus(){try{nxData=await get(`https://frc.nexus/api/v1/event/${C.event}`,hn(C.nexus));setLive(true);return true;}catch{setLive(false);return false;}}
+async function fMx(){try{tbaMx=await get(`https://www.thebluealliance.com/api/v3/event/${C.event}/matches`,ht(C.tba));return true;}catch{return false;}}
+async function fRk(){try{tbaRk=await get(`https://www.thebluealliance.com/api/v3/event/${C.event}/rankings`,ht(C.tba));return true;}catch{return false;}}
+async function fAlliances(){try{tbaAlliances=await get(`https://www.thebluealliance.com/api/v3/event/${C.event}/alliances`,ht(C.tba));return true;}catch{return false;}}
+async function fTi(){try{tbaTi=await get(`https://www.thebluealliance.com/api/v3/team/frc${C.team}`,ht(C.tba));}catch{}}
+async function fEv(){try{const ev=await get(`https://www.thebluealliance.com/api/v3/event/${C.event}`,ht(C.tba));document.getElementById('hdr-ev').textContent=ev.name||C.event;tbaWc=ev.webcasts||[];rStream();}catch{}}
+
+async function init(){
+  document.getElementById('hdr-team').textContent='#'+C.team;
+  await Promise.all([fNexus(),fMx(),fRk(),fAlliances(),fTi(),fEv()]);
+  document.getElementById('lo').style.display='none';
+  renderAll(); startCd();
+  setInterval(async()=>{await fNexus();rQ();rMl();rAlerts();updateBumperBox();stamp();},15000);
+  setInterval(async()=>{await Promise.all([fMx(),fRk(),fAlliances(),fTi()]);rMl();rRank();rTeam();if(bracketView)rBracket();updateBumperBox();stamp();},30000);
+}
+
+function renderAll(){rQ();rMl();rRank();rTeam();rAlerts();rStream();updateBumperBox();stamp();}
+
+// HEADER COUNTDOWN
+function startCd(){clearInterval(cdTick);cdTick=setInterval(tickCd,1000);tickCd();}
+function tickCd(){
+  const wrap=document.getElementById('hdr-cd');
+  if(!nxData){wrap.innerHTML='';return;}
+  // If Nexus isn't actively queuing, don't show any countdown
+  const nowQ=nxData.nowQueuing;
+  if(!nowQ){wrap.innerHTML='';return;}
+  const mx=nxData.matches||[];
+  const DONE = new Set(['Completed','On field','On deck']);
+  const nxt=mx.find(m=>!DONE.has(m.status)&&[...(m.redTeams||[]),...(m.blueTeams||[])].includes(C.team));
+  if(!nxt){wrap.innerHTML='';return;}
+  if(nxt.status==='Now queuing'){
+    wrap.innerHTML=`<div class="cd-pill" style="border-color:rgba(255,23,68,.5);background:rgba(255,23,68,.1)"><span class="cd-lbl" style="color:var(--red)">&#x1F6A8; Queue Now!</span><span class="cd-match">${e(nxt.label)}</span><span class="cd-val urg">NOW!</span></div>`;
+    return;
+  }
+  const qt=nxt.times?.estimatedQueueTime||nxt.times?.actualQueueTime;
+  if(!qt){wrap.innerHTML=`<div class="cd-pill"><span class="cd-lbl">&#9888; Next:</span><span class="cd-match">${e(nxt.label)}</span><span class="cd-val" style="font-size:var(--fs-hdr);color:var(--text-mid)">TBD</span></div>`;return;}
+  const diff=qt-Date.now();
+  if(diff<=0){wrap.innerHTML=`<div class="cd-pill" style="border-color:rgba(255,23,68,.5);background:rgba(255,23,68,.1)"><span class="cd-lbl" style="color:var(--red)">&#x1F6A8; Queue Now!</span><span class="cd-match">${e(nxt.label)}</span><span class="cd-val urg">NOW!</span></div>`;return;}
+  const ts=Math.floor(diff/1000),m=Math.floor(ts/60),s=ts%60,urg=m<5;
+  wrap.innerHTML=`<div class="cd-pill" style="${urg?'border-color:rgba(255,23,68,.5);background:rgba(255,23,68,.08)':''}"><span class="cd-lbl" style="${urg?'color:var(--red)':''}">&#9888; Queue in</span><span class="cd-match">${e(nxt.label)}</span><span class="cd-val${urg?' urg':''}">${m}:${String(s).padStart(2,'0')}</span></div>`;
+}
+
+// QUEUING
+function rQ(){
+  const el=document.getElementById('q-display');
+  if(!nxData){el.innerHTML='<div class="not-q">No Nexus data</div>';return;}
+  const mx=nxData.matches||[],_rawNowQ=nxData.nowQueuing;
+  // If Nexus reports a practice match label that doesn't exist in the match list
+  // (e.g. 'Practice 26' when only 25 exist), treat it as not queuing.
+  const nowQ = (_rawNowQ && /^practice/i.test(_rawNowQ) && !mx.find(m=>m.label===_rawNowQ))
+    ? null : _rawNowQ;
+
+  const queuingMatch = nowQ ? mx.find(m=>m.label===nowQ) : null;
+  const deckMatch    = nowQ ? mx.find(m=>m.status==='On deck') : null;
+  // "On Field" -- first check if Nexus explicitly marks any match as On field
+  // (this works during practice rounds when positional logic falls short).
+  // Fall back to the match immediately before nowQueuing in the non-practice schedule.
+  const explicitOnField = [...mx].reverse().find(m=>m.status==='On field');
+  const nonPracticeMx = mx.filter(m=>!/^practice/i.test(m.label));
+  const qIdx = nowQ ? nonPracticeMx.findIndex(m=>m.label===nowQ) : -1;
+  const positionalOnField = qIdx > 0 ? nonPracticeMx[qIdx - 1] : null;
+  const onFieldMatch = explicitOnField || positionalOnField;
+
+  // Find team's next match (same logic as updateBumperBox)
+  const sm=scoreMap();
+  const allLabels=mx.map(m=>m.label);
+  const nowQIdx=nowQ?allLabels.indexOf(nowQ):-1;
+  const isPlayedQ=m=>{
+    if(m.status==='Completed') return true;
+    if(nowQIdx>-1){const i=allLabels.indexOf(m.label);if(i>-1&&i<nowQIdx)return true;}
+    if(!/^practice/i.test(m.label)){
+      if(m.status==='On field'&&(!!sm[nl(m.label)]||!nowQ))return true;
+      if(m.status==='On deck'&&!nowQ)return true;
+    }
+    return false;
+  };
+  const myMxQ=mx.filter(m=>[...(m.redTeams||[]),...(m.blueTeams||[])].includes(C.team));
+  const myNext=nowQ?myMxQ.find(m=>!isPlayedQ(m)):null;
+
+  // Expected queue time for myNext
+  const myNextQt=myNext?.times?.estimatedQueueTime||myNext?.times?.actualQueueTime;
+  const myNextTimeStr=myNextQt?ft(new Date(myNextQt)):null;
+
+  let html='';
+  if(nowQ){
+    const heading=myNext?e(myNext.label):'&mdash;';
+    const subline=myNextTimeStr
+      ?`<div style="font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;color:var(--text-dim);margin-top:2px">Est. Queue: ${myNextTimeStr}</div>`
+      :'';
+    html+=`<div class="sec-lbl" style="font-size:var(--fs-sm);margin-bottom:2px">Your Next Match</div><div class="now-q">${heading}</div>${subline}`;
+  } else {
+    html+=`<div class="not-q">Not queuing</div>`;
+  }
+
+  // Alliance grid — show alliances for team's next match
+  if(nowQ && myNext && (myNext.redTeams?.length || myNext.blueTeams?.length)){
+    const r=myNext.redTeams||[],bl=myNext.blueTeams||[];
+    html+=`<div class="a-row"><div class="a-blk bl"><div class="a-label">Blue</div>${bl.map(t=>`<div class="a-team${t===C.team?' me':''}">${e(t)}</div>`).join('')}</div><div class="vs">VS</div><div class="a-blk rd"><div class="a-label">Red</div>${r.map(t=>`<div class="a-team${t===C.team?' me':''}">${e(t)}</div>`).join('')}</div></div>`;
+  }
+
+  // 3-column status strip: On Field | On Deck | Queuing
+  if(nowQ){
+    html+=`<div class="ss">
+      <div class="sc"><div class="sc-l">On Field</div><div class="sc-v${onFieldMatch?' on':''}">${onFieldMatch?e(onFieldMatch.label):'&mdash;'}</div></div>
+      <div class="sc"><div class="sc-l">On Deck</div><div class="sc-v${deckMatch?' on':''}">${deckMatch?e(deckMatch.label):'&mdash;'}</div></div>
+      <div class="sc"><div class="sc-l">Queuing</div><div class="sc-v on">${e(nowQ)}</div></div>
+    </div>`;
+  }
+
+  el.innerHTML=html;
+
+  // Schedule delay — compare estimated start of on-field match to its scheduled start
+  updateScheduleDelay(mx, nowQ);
+
+  if(bracketView) syncQueueingToSidebar();
+}
+
+function updateScheduleDelay(mx, nowQ){
+  const el=document.getElementById('hdr-delay');
+  if(!el) return;
+  if(!nowQ||!mx){el.textContent='';return;}
+
+  // Find the match currently on field (most recently started)
+  const candidates=mx.filter(m=>m.times?.actualStartTime||m.times?.estimatedStartTime);
+  if(!candidates.length){el.textContent='';return;}
+
+  // Use the match being queued (nowQ) to get delay: compare estimated vs scheduled
+  const qm=mx.find(m=>m.label===nowQ);
+  if(!qm?.times){el.textContent='';return;}
+
+  const est=qm.times.estimatedStartTime;
+  const sched=qm.times.scheduledStartTime||qm.times.scheduledQueueTime;
+  if(!est||!sched){el.textContent='';return;}
+
+  const delayMs=est-sched;
+  const delayMin=Math.round(delayMs/60000);
+
+  if(Math.abs(delayMin)<1){el.textContent='On time';el.style.color='var(--green)';return;}
+
+  if(delayMin>0){
+    el.textContent=`+${delayMin}m behind`;
+    el.style.color=delayMin>=15?'var(--red)':delayMin>=5?'var(--yellow)':'var(--text-dim)';
+  } else {
+    el.textContent=`${Math.abs(delayMin)}m ahead`;
+    el.style.color='var(--green)';
+  }
+}
+
+// MATCH LIST — no practice, auto-scroll
+function rMl(){
+  const el=document.getElementById('ml');
+  const myT=C.team,nxMx=nxData?.matches||[],sm=scoreMap();
+  const quals=nxMx.filter(m=>/^qual/i.test(m.label));
+  const pffs=nxMx.filter(m=>!(/^practice|^qual/i.test(m.label)));
+
+  if(!quals.length&&!pffs.length&&!tbaMx?.length){el.innerHTML='<div class="empty">No matches scheduled</div>';return;}
+
+  let html='',scrollId=null;
+
+  const mkRow=(m)=>{
+    const r=m.redTeams||[],bl=m.blueTeams||[];
+    const isMe=r.includes(myT)||bl.includes(myT);
+    const isAct=['Now queuing','On deck','On field'].includes(m.status);
+    const sc=sm[nl(m.label)];
+    // Done if Nexus says Completed, or On field + TBA has score, or On field/On deck + event not actively queuing
+    const nowQ=nxData?.nowQueuing;
+    const isDn=m.status==='Completed'
+      ||(m.status==='On field'&&(!!sc||!nowQ))
+      ||(m.status==='On deck'&&!nowQ);
+    const id='mr_'+m.label.replace(/[^a-z0-9]/gi,'_');
+    if(isAct) scrollId=id;
+    else if(!scrollId&&isMe&&!isDn) scrollId=id;
+    const mkC=(ts,cls)=>ts.map(t=>`<span class="chip ${t===myT?'cm':cls}">${e(t)}</span>`).join('');
+    const right=sc?`<div class="mscore"><span class="scb">${sc.blue}</span><span class="scs">&ndash;</span><span class="scr">${sc.red}</span></div>`:`<div class="mtime">${ts2(m)}</div>`;
+    const actDisplay=isAct&&!isDn; // only show active glow if truly in progress
+    let cls='mr';if(isMe)cls+=' my';if(actDisplay)cls+=' act';if(isDn)cls+=' dn';
+    return`<div class="${cls}" id="${id}"><div class="ml-lbl">${e(m.label)}</div><div class="ml-teams">${mkC(bl,'cb')}${mkC(r,'cr')}</div>${right}${mkBadge(m,!!sc)}</div>`;
+  };
+
+  if(quals.length){html+=`<div class="msh">Qualification<span class="mc">${quals.length}</span></div>`;quals.forEach(m=>{html+=mkRow(m);});}
+  if(pffs.length){html+=`<div class="msh" style="margin-top:8px">Playoffs<span class="mc">${pffs.length}</span></div>`;pffs.forEach(m=>{html+=mkRow(m);});}
+
+  if(!quals.length&&!pffs.length&&tbaMx?.length){
+    const srt=[...tbaMx].sort((a,b)=>a.match_number-b.match_number);
+    const qm=srt.filter(m=>m.comp_level==='qm'),sf=srt.filter(m=>m.comp_level==='sf'),f=srt.filter(m=>m.comp_level==='f');
+    const tRow=(m)=>{
+      const r=(m.alliances?.red?.team_keys||[]).map(k=>k.replace('frc','')),bl=(m.alliances?.blue?.team_keys||[]).map(k=>k.replace('frc',''));
+      const isMe=r.includes(myT)||bl.includes(myT),done=m.actual_time!=null;
+      const mkC=(ts,cls)=>ts.map(t=>`<span class="chip ${t===myT?'cm':cls}">${e(t)}</span>`).join('');
+      const right=done&&m.alliances?`<div class="mscore"><span class="scb">${m.alliances.blue?.score??'?'}</span><span class="scs">&ndash;</span><span class="scr">${m.alliances.red?.score??'?'}</span></div>`:`<div class="mtime">${m.predicted_time?ft(new Date(m.predicted_time*1000)):'&mdash;'}</div>`;
+      return`<div class="mr${isMe?' my':''}${done?' dn':''}"><div class="ml-lbl">Qual ${m.match_number}</div><div class="ml-teams">${mkC(bl,'cb')}${mkC(r,'cr')}</div>${right}<span class="badge bx">${done?'Done':'Scheduled'}</span></div>`;
+    };
+    if(qm.length){html+=`<div class="msh">Qualification<span class="mc">${qm.length}</span></div>`;qm.forEach(m=>{html+=tRow(m);});}
+    if(sf.length){html+=`<div class="msh" style="margin-top:8px">Semifinals<span class="mc">${sf.length}</span></div>`;sf.forEach(m=>{html+=tRow(m);});}
+    if(f.length){html+=`<div class="msh" style="margin-top:8px">Finals<span class="mc">${f.length}</span></div>`;f.forEach(m=>{html+=tRow(m);});}
+  }
+
+  el.innerHTML=html;
+  if(scrollId){requestAnimationFrame(()=>{const t=document.getElementById(scrollId);if(t)t.scrollIntoView({behavior:'smooth',block:'center'});});}
+}
+
+function mkBadge(m, hasTbaScore) {
+    const statuses = {
+        'Now queuing': 'bq',
+        'On deck': 'bd',
+        'On field': 'bf',
+        'Completed': 'bx',
+        'Queuing soon': 'bx'
+    };
+
+    // Treat as done if:
+    // - Nexus says Completed, OR
+    // - Status is On field AND TBA has a score, OR
+    // - Status is On field AND Nexus isn't actively queuing anything (event over)
+    const nowQ = nxData?.nowQueuing;
+    if (m.status === 'On field' && (hasTbaScore || !nowQ)) {
+        return `<span class="badge bx">Done</span>`;
+    }
+    // On deck is stale too when not actively queuing
+    if (m.status === 'On deck' && !nowQ) {
+        return `<span class="badge bx">Done</span>`;
+    }
+
+    let scheduled = '—';
+    if (m.times) {
+        const t = m.times.actualQueueTime || m.times.estimatedQueueTime;
+        if (t) scheduled = ft(new Date(t));
+    }
+
+    const label = (m.status === 'Queuing soon')
+        ? scheduled
+        : (m.status || scheduled);
+
+    return `<span class="badge ${statuses[m.status] || 'bx'}">${label}</span>`;
+}
+function scoreMap(){
+  const map={};
+  (tbaMx||[]).forEach(m=>{
+    if(!m.alliances) return;
+    const bs=m.alliances.blue?.score, rs=m.alliances.red?.score;
+    if(bs==null||bs<0||rs==null||rs<0) return;
+    let k;
+    if(m.comp_level==='qm')       k=`qual_${m.match_number}`;
+    else if(m.comp_level==='sf')  k=`sf_${m.set_number}`;   // set_number IS the playoff match# (1-13)
+    else if(m.comp_level==='f')   k=`f_${m.match_number}`;
+    else                           k=`${m.comp_level}_${m.match_number}`;
+    map[k]={blue:bs, red:rs};
+  });
+  return map;
+}
+function nl(label){
+  if(!label) return '';
+  const l=label.toLowerCase();
+  const qm=l.match(/qual(?:ification)?\s+(\d+)/); if(qm) return `qual_${qm[1]}`;
+  const pf=l.match(/playoff\s+(\d+)/);            if(pf) return `sf_${pf[1]}`;
+  const sf=l.match(/semifinal\s+(\d+)/);           if(sf) return `sf_${sf[1]}`;
+  const f =l.match(/final\s+(\d+)/);               if(f)  return `f_${f[1]}`;
+  return label;
+}
+function ts2(m){if(!m.times)return'&mdash;';const t=m.times.actualQueueTime||m.times.estimatedQueueTime;return t?ft(new Date(t)):'&mdash;';}
+function ft(d){return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+
+// RANKINGS
+function rRank(){
+  const el=document.getElementById('rank-content');
+  if(!tbaRk?.rankings){el.innerHTML='<div class="empty">No rankings yet</div>';return;}
+  let html=`<table class="rt"><thead><tr><th colspan="2">Team</th><th>W&ndash;L&ndash;T</th><th>RP</th></tr></thead><tbody>`;
+  tbaRk.rankings.slice(0,24).forEach(r=>{const n=r.team_key.replace('frc',''),me=n===C.team,rp=r.sort_orders?.[0],rec=r.record?`${r.record.wins}&ndash;${r.record.losses}&ndash;${r.record.ties}`:'&mdash;';html+=`<tr${me?' class="rme"':''}><td><span class="rp">${r.rank}</span></td><td><span class="rn${me?' me':''}">${n}</span></td><td>${rec}</td><td>${typeof rp==='number'?rp.toFixed(2):'&mdash;'}</td></tr>`;});
+  el.innerHTML=html+'</tbody></table>';
+}
+
+// TEAM TAB
+function rTeam(){
+  const el=document.getElementById('team-content');
+  const myT=C.team,info=tbaTi,ri=tbaRk?.rankings?.find(r=>r.team_key===`frc${myT}`);
+  const mx=(nxData?.matches||[]).filter(m=>!/^practice/i.test(m.label)&&[...(m.redTeams||[]),...(m.blueTeams||[])].includes(myT));
+  const nowQ=nxData?.nowQueuing;
+  const sm=scoreMap();
+  // A match is played if Nexus says Completed, or On field + TBA has score, or event not actively queuing
+  const isPlayed=m=>m.status==='Completed'
+    ||(m.status==='On field'&&(!!sm[nl(m.label)]||!nowQ))
+    ||(m.status==='On deck'&&!nowQ);
+  const played=mx.filter(isPlayed);
+  // A match is next only when event is actively queuing and it's genuinely upcoming
+  const nxt=nowQ ? mx.find(m=>!isPlayed(m)) : null;
+
+  // Build per-match RP map from TBA score_breakdown
+  // TBA stores rp as score_breakdown.[red|blue].rp (works 2016+, field name consistent)
+  const rpMap={};
+  (tbaMx||[]).filter(m=>m.comp_level==='qm'&&m.score_breakdown).forEach(m=>{
+    const key=`qual_${m.match_number}`;
+    rpMap[key]={
+      red:  m.score_breakdown.red?.rp  ?? m.score_breakdown.red?.totalPoints  ?? null,
+      blue: m.score_breakdown.blue?.rp ?? m.score_breakdown.blue?.totalPoints ?? null,
+    };
+    // Zero is a valid RP — only null/undefined means missing
+    if(rpMap[key].red  == null) delete rpMap[key];
+  });
+
+  let html='';
+  if(info){html+=`<div class="ic"><div class="it">${e(info.nickname||'Team '+myT)}</div><div class="is">${[info.city,info.state_prov,info.country].filter(Boolean).join(', ')}</div><div class="str" style="grid-template-columns:1fr 1fr"><div class="stc"><div class="stv ac">#${myT}</div><div class="stl">Team</div></div><div class="stc"><div class="stv">${info.rookie_year||'&mdash;'}</div><div class="stl">Rookie</div></div></div></div>`;}
+  if(ri){const rec=ri.record?`${ri.record.wins}&ndash;${ri.record.losses}&ndash;${ri.record.ties}`:'&mdash;',rp=ri.sort_orders?.[0];html+=`<div class="str"><div class="stc"><div class="stv gn">#${ri.rank}</div><div class="stl">Rank</div></div><div class="stc"><div class="stv" style="font-size:var(--fs-lbl)">${rec}</div><div class="stl">Record</div></div><div class="stc"><div class="stv">${typeof rp==='number'?rp.toFixed(1):'&mdash;'}</div><div class="stl">RP</div></div></div>`;}
+  if(nxt){
+    const r=nxt.redTeams||[],bl=nxt.blueTeams||[],isR=r.includes(myT),ac=isR?'var(--red-a)':'var(--blue-a)',al=isR?'Red Alliance':'Blue Alliance';
+    const part=(isR?r:bl).filter(t=>t!==myT),opp=isR?bl:r;
+    html+=`<div class="sbl">Next Match</div><div class="ic" style="border-color:${ac}88"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div style="font-family:var(--fd);font-size:var(--fs-lbl);font-weight:900">${e(nxt.label)}</div>${mkBadge(nxt.status)}</div><div style="font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:${ac};margin-bottom:5px">${al}</div><div style="margin-bottom:6px"><div style="font-size:var(--fs-sm);color:var(--text-dim);margin-bottom:3px">Partners</div><div style="display:flex;gap:4px">${part.map(t=>`<span class="chip ${isR?'cr':'cb'}">${e(t)}</span>`).join('')}</div></div><div><div style="font-size:var(--fs-sm);color:var(--text-dim);margin-bottom:3px">Opponents</div><div style="display:flex;gap:4px">${opp.map(t=>`<span class="chip ${isR?'cb':'cr'}">${e(t)}</span>`).join('')}</div></div>${ts2(nxt)!=='&mdash;'?`<div style="margin-top:6px;font-family:var(--fm);font-size:var(--fs-sm);color:var(--text-dim)">Est. queue: ${ts2(nxt)}</div>`:''}</div>`;
+  }
+  if(played.length){
+    html+=`<div class="sbl">Played (${played.length})</div>`;
+    // Header row
+    html+=`<div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;padding:4px 0 5px;border-bottom:2px solid var(--border);font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim)">
+      <span>Match</span><span style="text-align:right">Score</span><span style="text-align:right;min-width:42px">RP</span>
+    </div>`;
+    played.forEach(m=>{
+      const sc=sm[nl(m.label)];
+      const rpKey=nl(m.label);
+      const rpEntry=rpMap[rpKey];
+
+      // Determine which alliance my team was on for this Nexus match
+      const isRed=(m.redTeams||[]).includes(myT);
+      const myRp=rpEntry?(isRed?rpEntry.red:rpEntry.blue):null;
+
+      // RP badge colour — 0=dim, 1=normal, 2+=accent, 3+=green
+      const rpColor=myRp==null?'var(--text-dim)':myRp>=3?'var(--green)':myRp>=2?'var(--accent)':myRp>=1?'var(--text)':'var(--text-dim)';
+      const rpDisplay=myRp!=null?myRp:'&mdash;';
+
+      html+=`<div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-family:var(--fd);font-size:var(--fs-body);font-weight:700">
+        <span>${e(m.label)}</span>
+        <span style="text-align:right">${sc?`<span style="color:#64b5f6">${sc.blue}</span><span style="color:var(--text-dim)"> &ndash; </span><span style="color:#ef9a9a">${sc.red}</span>`:'<span style="color:var(--text-dim)">&mdash;</span>'}</span>
+        <span style="text-align:right;min-width:42px;font-size:var(--fs-lbl);color:${rpColor}">${rpDisplay}</span>
+      </div>`;
+    });
+  }
+  if(!html)html='<div class="empty">No data yet</div>';
+  el.innerHTML=html;
+}
+
+// ALERTS
+function rAlerts(){
+  const ann=nxData?.announcements||[],parts=nxData?.partsRequests||[],tot=ann.length+parts.length;
+  const b=document.getElementById('abadge');b.style.display=tot>0?'inline-block':'none';b.textContent=tot;
+
+  document.getElementById('ann-content').innerHTML=ann.length===0
+    ?'<div class="empty">No announcements</div>'
+    :ann.map(a=>{
+        // Nexus may use any of these field names for the body text
+        const body=a.body||a.text||a.message||a.content||a.announcement||JSON.stringify(a);
+        const t=a.postedTime?ft(new Date(a.postedTime)):(a.time?ft(new Date(a.time)):'');
+        return`<div style="background:var(--surface2);border:2px solid rgba(255,107,53,.3);border-left:4px solid var(--accent2);border-radius:var(--r);padding:9px 11px;margin-bottom:7px;line-height:1.5">
+          <div style="font-size:var(--fs-body);color:var(--text);margin-bottom:${t?'4px':'0'}">${e(body)}</div>
+          ${t?`<div style="font-family:var(--fm);font-size:var(--fs-sm);color:var(--text-dim)">${t}</div>`:''}
+        </div>`;
+      }).join('');
+
+  document.getElementById('parts-content').innerHTML=parts.length===0
+    ?'<div class="empty">No active parts requests</div>'
+    :parts.map(p=>{
+        const team=p.requestedByTeam||p.teamNumber||p.team||p.teamNum||'?';
+        const body=p.parts||p.request||p.body||p.text||p.message||p.content||p.part||p.item||JSON.stringify(p);
+        const t=p.postedTime?ft(new Date(p.postedTime)):(p.time?ft(new Date(p.time)):'');
+        return`<div style="background:var(--surface2);border:2px solid rgba(255,214,0,.3);border-left:4px solid var(--yellow);border-radius:var(--r);padding:9px 11px;margin-bottom:7px;line-height:1.5">
+          <div style="font-family:var(--fd);font-size:var(--fs-lbl);font-weight:900;color:var(--yellow);margin-bottom:4px">Team ${e(String(team))}</div>
+          <div style="font-size:var(--fs-body);color:var(--text);margin-bottom:${t?'4px':'0'}">${e(body)}</div>
+          ${t?`<div style="font-family:var(--fm);font-size:var(--fs-sm);color:var(--text-dim)">${t}</div>`:''}
+        </div>`;
+      }).join('');
+}
+
+
+// STREAM
+async function isYouTubeLive(videoId) {
+  // YouTube oEmbed returns metadata including whether the video is a live stream.
+  // If the video is not live / not found it either errors or returns type != 'video'.
+  // We also check the title for FRC-typical indicators, but the key signal is that
+  // a live stream's oEmbed 'html' field contains 'live' in the thumbnail URL or
+  // the request succeeds at all (private/deleted streams fail).
+  // Most reliable no-key approach: fetch the youtube.com/watch page and check for
+  // "isLiveBroadcast" or "hlsManifestUrl" in the inline JSON.
+  try {
+    const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+    if (!res.ok) return false; // deleted, private, or region-blocked
+    // oEmbed succeeds for both live and VOD — but a live stream that hasn't started
+    // yet or has ended will still return 200. We treat any valid response as
+    // "potentially live" and let the embed itself show the live indicator.
+    // Non-existent / private videos throw a 404, so filtering those out is the win.
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function rStream() {
+  const half = document.getElementById('stream-half');
+  const emb  = document.getElementById('s-embed');
+  const nowc = document.getElementById('s-nowc');
+  const ti   = document.getElementById('s-title');
+
+  if (!tbaWc) return;
+  if (stHidden) { half.style.display = 'none'; return; }
+
+  const yt  = tbaWc.filter(w => w.type === 'youtube');
+  const all = [...yt, ...tbaWc.filter(w => w.type !== 'youtube')];
+
+  if (!all.length) {
+    emb.style.display = 'none';
+    nowc.style.display = 'flex';
+    return;
+  }
+
+  // Show the panel while we probe
+  emb.style.display = 'block';
+  nowc.style.display = 'none';
+  ti.textContent = 'Checking streams…';
+
+  // Probe all YouTube streams in parallel, pick the first live one
+  if (yt.length > 0) {
+    const checks = await Promise.all(
+      yt.map(w => isYouTubeLive(w.channel).then(live => ({ w, live })))
+    );
+    const liveStream = checks.find(c => c.live);
+    if (liveStream) {
+      // Find its index in the full `all` list so the selector stays in sync
+      stIdx = all.indexOf(liveStream.w);
+      if (stIdx < 0) stIdx = 0;
+    }
+  }
+
+  // Populate selector
+  const sel = document.getElementById('s-sel');
+  sel.style.display = all.length > 1 ? 'block' : 'none';
+  if (all.length > 1) {
+    sel.innerHTML = all.map((w, i) => `<option value="${i}"${i === stIdx ? ' selected' : ''}>Stream ${i + 1} (${w.type})</option>`).join('');
+  }
+
+  loadEmbed(all[stIdx] || all[0]);
+}
+function loadEmbed(w){if(!w)return;const fr=document.getElementById('s-iframe'),ti=document.getElementById('s-title');if(w.type==='youtube'){fr.src=`https://www.youtube.com/embed/${w.channel}?autoplay=1&mute=1&rel=0&modestbranding=1`;ti.textContent='Livestream \u2014 YouTube';}else if(w.type==='twitch'){fr.src=`https://player.twitch.tv/?channel=${w.channel}&autoplay=true&muted=true&parent=${location.hostname||'localhost'}`;ti.textContent='Livestream \u2014 Twitch';}else{fr.src='';ti.textContent=`Livestream (${w.type})`;}}
+
+function switchStream(idx){stIdx=parseInt(idx);const yt=(tbaWc||[]).filter(w=>w.type==='youtube'),all=[...yt,...(tbaWc||[]).filter(w=>w.type!=='youtube')];if(all[stIdx])loadEmbed(all[stIdx]);}
+function toggleStreamVisibility(){
+  const half=document.getElementById('stream-half');
+  const btn=document.getElementById('stream-toggle-btn');
+  if(!half) return;
+  stHidden=!stHidden;
+  if(stHidden){
+    half.style.display='none';
+    if(!bracketView) document.getElementById('top-row').style.gridTemplateColumns='1fr';
+    if(btn) btn.textContent='📺 Show Stream';
+  } else {
+    half.style.display='';
+    if(!bracketView) document.getElementById('top-row').style.gridTemplateColumns='';
+    else setStreamHeight();
+    if(btn) btn.textContent='📺 Hide Stream';
+    rStream();
+  }
+}
+
+// TABS
+function switchTab(name,btn){switchTabById('tab-'+name,btn);}
+
+// UTILS
+function setLive(ok){document.getElementById('ldot').className='ldot'+(ok?'':' off');document.getElementById('ltxt').textContent=ok?'Live':'Offline';}
+function stamp(){document.getElementById('tk-stamp').textContent=new Date().toLocaleTimeString();}
+function e(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function updateBumperBox() {
+    const box    = document.getElementById('bumper-box');
+    const clear  = () => {
+        box.textContent='—'; box.className='bumper-box';
+        if(bracketView) syncQueueingToSidebar();
+    };
+    if (!nxData) { clear(); return; }
+
+    const myT  = C.team;
+    const mx   = nxData.matches || [];
+    const nowQ = nxData.nowQueuing;
+    const sm   = scoreMap();
+
+    // Build an ordered index of all matches so we can compare positions.
+    // Any match that appears before the currently-queuing match is considered played.
+    const allLabels = mx.map(m=>m.label);
+    const nowQIdx   = nowQ ? allLabels.indexOf(nowQ) : -1;
+
+    const isPlayed = m => {
+      if (m.status==='Completed') return true;
+      // If we know the queue position, anything before nowQueuing is done
+      if (nowQIdx > -1) {
+        const mIdx = allLabels.indexOf(m.label);
+        if (mIdx > -1 && mIdx < nowQIdx) return true;
+      }
+      // For non-practice matches also use TBA score / stale-deck logic
+      if (!/^practice/i.test(m.label)) {
+        if (m.status==='On field' && (!!sm[nl(m.label)]||!nowQ)) return true;
+        if (m.status==='On deck'  && !nowQ) return true;
+      }
+      return false;
+    };
+
+    const myMx   = mx.filter(m=>[...(m.redTeams||[]),...(m.blueTeams||[])].includes(myT));
+    const myNext = nowQ ? myMx.find(m=>!isPlayed(m)) : null;
+
+    // Bumper color — only when actively queuing and we have a next match
+    if (!nowQ || !myNext) {
+        box.textContent='—'; box.className='bumper-box';
+    } else {
+        const isRed  = (myNext.redTeams||[]).includes(myT);
+        const isBlue = (myNext.blueTeams||[]).includes(myT);
+        if (isRed)       { box.textContent='Your Bumper Color: RED';  box.className='bumper-box bumper-red';  }
+        else if (isBlue) { box.textContent='Your Bumper Color: BLUE'; box.className='bumper-box bumper-blue'; }
+        else             { box.textContent='—'; box.className='bumper-box'; }
+    }
+
+    if(bracketView) syncQueueingToSidebar();
+}
+
+// BRACKET VIEW
+function toggleBracket(){
+  bracketView = !bracketView;
+  const btn    = document.getElementById('bracket-toggle-btn');
+  const colL   = document.querySelector('.col-l');
+  const topRow = document.getElementById('top-row');
+  const stHalf = document.getElementById('stream-half');
+  const ml     = document.getElementById('ml');
+  const bktPnl = document.getElementById('bracket-panel');
+  const panelM = document.getElementById('panel-m');
+  const pTitle = document.getElementById('panel-m-title');
+
+  btn.textContent = bracketView ? '📋 Match List' : '🏆 Playoff Bracket';
+
+  if(bracketView){
+    // --- Enter bracket mode ---
+
+    // 1. Hide the entire top-row (queuing + stream bar area)
+    topRow.style.display = 'none';
+
+    // 2. Put stream as a standalone fixed-height strip directly in col-l
+    //    Move stream-half out of top-row and insert before panel-m
+    colL.insertBefore(stHalf, panelM);
+    stHalf.style.borderRight  = 'none';
+    stHalf.style.borderBottom = '2px solid var(--border)';
+    stHalf.style.flexShrink   = '0';
+    // Set stream height to 16:9 based on current col-l width
+    setStreamHeight();
+
+    colL.classList.add('bracket-mode');
+    stHalf.classList.add('bracket-mode');
+    bktPnl.classList.add('bracket-mode');
+
+    // 3. Replace panel-m contents with bracket
+    panelM.style.cssText = 'display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;padding:0;background:var(--bg)';
+    pTitle.style.display = 'none';
+    ml.style.display     = 'none';
+
+    // 4. Sidebar: hide Rankings + My Team, show Queuing tab
+    document.getElementById('tab-rankings').style.display = 'none';
+    document.getElementById('tab-team').style.display     = 'none';
+    rebuildTabBar(true);
+    switchTabById('tab-queuing');
+    syncQueueingToSidebar();
+
+    rBracket();
+
+  } else {
+    // --- Exit bracket mode ---
+
+    // Restore top-row
+    topRow.style.display = '';
+
+    // Move stream-half back inside top-row
+    topRow.insertBefore(stHalf, topRow.firstChild);
+    stHalf.style.borderRight  = '';
+    stHalf.style.borderBottom = '';
+    stHalf.style.flexShrink   = '';
+    stHalf.style.height       = '';
+
+    colL.classList.remove('bracket-mode');
+    stHalf.classList.remove('bracket-mode');
+    bktPnl.classList.remove('bracket-mode');
+
+    panelM.style.cssText = '';
+    pTitle.style.display = '';
+    ml.style.display     = 'flex';
+
+    // Restore sidebar
+    document.getElementById('tab-rankings').style.display = '';
+    document.getElementById('tab-team').style.display     = '';
+    document.getElementById('tab-queuing').style.display  = 'none';
+    document.getElementById('tab-queuing').classList.remove('act');
+    rebuildTabBar(false);
+    switchTabById('tab-rankings');
+  }
+}
+
+function setStreamHeight(){
+  // Set stream-half height to 16:9 based on the col-l's current width
+  const colL  = document.querySelector('.col-l');
+  const stHalf = document.getElementById('stream-half');
+  if(colL && stHalf && bracketView){
+    const w = colL.getBoundingClientRect().width;
+    stHalf.style.height = Math.round(w * 9/16) + 'px';
+  }
+}
+
+// Recalculate stream height on resize
+window.addEventListener('resize', ()=>{ if(bracketView) setStreamHeight(); });
+
+function rebuildTabBar(bracketMode){
+  const bar = document.querySelector('.tab-bar');
+  if(bracketMode){
+    bar.innerHTML=`
+      <button class="tab-btn act" onclick="switchTabById('tab-queuing',this)">Queuing</button>
+      <button class="tab-btn" onclick="switchTabById('tab-alerts',this)">Alerts <span id="abadge" class="nbadge" style="display:none">0</span></button>`;
+  } else {
+    bar.innerHTML=`
+      <button class="tab-btn act" onclick="switchTabById('tab-rankings',this)">Rankings</button>
+      <button class="tab-btn" onclick="switchTabById('tab-team',this)">My Team</button>
+      <button class="tab-btn" onclick="switchTabById('tab-alerts',this)">Alerts <span id="abadge" class="nbadge" style="display:none">0</span></button>`;
+    // Re-apply alert badge count
+    rAlerts();
+  }
+}
+
+function switchTabById(id, btn){
+  document.querySelectorAll('.tp').forEach(p=>{p.style.display='none';p.classList.remove('act');});
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('act'));
+  const panel=document.getElementById(id);
+  if(panel){panel.style.display='block';panel.classList.add('act');}
+  if(btn) btn.classList.add('act');
+  else {
+    // Activate the button that matches
+    document.querySelectorAll('.tab-btn').forEach(b=>{
+      if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes(id)) b.classList.add('act');
+    });
+  }
+}
+
+function syncQueueingToSidebar(){
+  // Mirror the main queuing display into the sidebar queuing tab
+  const src = document.getElementById('q-display');
+  const dst = document.getElementById('q-display-sidebar');
+  if(src&&dst) dst.innerHTML = src.innerHTML;
+  const srcB = document.getElementById('bumper-box');
+  const dstB = document.getElementById('bumper-box-sidebar');
+  if(srcB&&dstB){dstB.textContent=srcB.textContent;dstB.className=srcB.className;}
+}
+
+function rBracket(){
+  const el=document.getElementById('bracket-panel');
+  const myTeam=C.team;
+  const alliances=tbaAlliances||[];
+
+  const mxByNum={};
+  (tbaMx||[]).filter(m=>m.comp_level==='sf').forEach(m=>{ mxByNum[`sf${m.set_number}`]=m; });
+  (tbaMx||[]).filter(m=>m.comp_level==='f').forEach(m=>{ mxByNum[`f${m.match_number}`]=m; });
+
+  const teamToSeed={};
+  alliances.forEach((a,i)=>{ (a.picks||[]).forEach(tk=>{ teamToSeed[tk.replace('frc','')]=i+1; }); });
+
+  function matchCard(matchKey, label){
+    const mx=mxByNum[matchKey];
+    if(!mx){
+      return `<div class="bkt-match">
+        <div class="bkt-match-lbl">${e(label)}</div>
+        <div class="bkt-alliance"><span class="bkt-seed">?</span><span class="bkt-teams bkt-tbd">TBD</span></div>
+        <div class="bkt-alliance"><span class="bkt-seed">?</span><span class="bkt-teams bkt-tbd">TBD</span></div>
+      </div>`;
+    }
+    const redKeys =(mx.alliances?.red?.team_keys||[]).map(k=>k.replace('frc',''));
+    const blueKeys=(mx.alliances?.blue?.team_keys||[]).map(k=>k.replace('frc',''));
+    const redScore =mx.alliances?.red?.score;
+    const blueScore=mx.alliances?.blue?.score;
+    const done=!!(mx.winning_alliance)&&redScore!=null&&redScore>=0;
+    const scorePill=done?`<span class="bkt-score-pill">${blueScore}–${redScore}</span>`:'';
+    const redWon=done&&mx.winning_alliance==='red';
+    const blueWon=done&&mx.winning_alliance==='blue';
+    const redSeed=teamToSeed[redKeys[0]]??'?';
+    const blueSeed=teamToSeed[blueKeys[0]]??'?';
+    const myMatch=redKeys.includes(myTeam)||blueKeys.includes(myTeam);
+
+    function allianceRow(keys,seed,isRed,won,pts){
+      if(!keys.length) return `<div class="bkt-alliance"><span class="bkt-seed">?</span><span class="bkt-teams bkt-tbd">TBD</span></div>`;
+      const teamsStr=keys.slice(0,3).join(' · ');
+      const isMe=keys.includes(myTeam);
+      const wonCls=done?(won?' bkt-winner':' bkt-loser'):'';
+      const myCls=isMe?' bkt-my-team':'';
+      const ptsHtml=pts!=null&&pts>=0?`<span class="bkt-pts${won?' bkt-winner-pts':''}">${pts}</span>`:'';
+      return `<div class="bkt-alliance${wonCls}">
+        <span class="bkt-seed ${isRed?'red-seed':'blue-seed'}">${seed}</span>
+        <span class="bkt-teams${myCls}">${e(teamsStr)}</span>
+        ${ptsHtml}
+      </div>`;
+    }
+
+    return `<div class="bkt-match${myMatch?' bkt-my':''}">
+      <div class="bkt-match-lbl">${e(label)} ${scorePill}</div>
+      ${allianceRow(blueKeys,blueSeed,false,blueWon,blueScore)}
+      ${allianceRow(redKeys,redSeed,true,redWon,redScore)}
+    </div>`;
+  }
+
+  // Fitted column helper — uses bkt-col-fit for no-scroll layout
+  function fitCol(title, keys, labels){
+    return `<div class="bkt-col-fit">
+      <div class="bkt-col-hdr">${title}</div>
+      ${keys.map((k,i)=>matchCard(k,labels[i])).join('')}
+    </div>`;
+  }
+
+  const finalKeys=['f1','f2','f3'];
+  const finalLbls=['Final 1','Final 2','Final 3'];
+  const finalCards=finalKeys.filter((k,i)=>mxByNum[k]||i===0).map((k,i)=>matchCard(k,finalLbls[i]));
+
+  const html=`<div class="bkt-full">
+
+    <!-- Upper bracket: left column -->
+    <div class="bkt-upper-area">
+      <div class="bkt-section-hdr">Upper Bracket</div>
+      <div class="bkt-rounds-fit">
+        ${fitCol('Round 1',['sf1','sf2','sf3','sf4'],['M1 (1v8)','M2 (4v5)','M3 (2v7)','M4 (3v6)'])}
+        ${fitCol('Semis',['sf5','sf6'],['M5','M6'])}
+        ${fitCol('Upper Final',['sf12'],['M12'])}
+      </div>
+    </div>
+
+    <!-- Lower bracket: right column -->
+    <div class="bkt-lower-area">
+      <div class="bkt-section-hdr">Lower Bracket</div>
+      <div class="bkt-rounds-fit">
+        ${fitCol('Round 1',['sf7','sf8'],['M7','M8'])}
+        ${fitCol('Round 2',['sf9','sf10'],['M9','M10'])}
+        ${fitCol('Lower Finals',['sf11','sf13'],['M11','M13'])}
+      </div>
+    </div>
+
+    <!-- Finals: bottom spanning both -->
+    <div class="bkt-finals-area">
+      <div class="bkt-section-hdr" style="margin-bottom:6px">Finals</div>
+      <div class="bkt-rounds-fit">
+        ${finalCards.join('')}
+      </div>
+    </div>
+
+  </div>`;
+
+  el.innerHTML=html;
+}
+
+// init() is called by setupLaunch() — not auto-invoked here
+</script>
+</body>
+</html>
