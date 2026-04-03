@@ -29,6 +29,8 @@
   --fs-sm:clamp(0.75rem,0.95vw,0.9rem);
   --fs-hdr:clamp(1.05rem,1.6vw,1.5rem);
   --fs-cd:clamp(1.7rem,3vw,2.7rem);
+  --fs-pit:clamp(1.4rem,2.2vw,2.0rem);   /* pit display — rankings/match list */
+  --fs-pit-xl:clamp(2.0rem,3.2vw,3.0rem); /* pit display XL */
   --pad:clamp(10px,1.3vw,20px);--r:8px;
 }
 
@@ -208,19 +210,19 @@ body[data-theme="custom"].has-bg::before{
 .panel-m::-webkit-scrollbar{width:4px}
 .panel-m::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 .ml{display:flex;flex-direction:column;gap:4px}
-.msh{font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);padding:8px 0 4px;border-bottom:2px solid var(--border);margin-bottom:4px;display:flex;align-items:center;justify-content:space-between}
+.msh{font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);padding:10px 0 6px;border-bottom:2px solid var(--border);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
 .mc{background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:1px 7px;font-family:var(--fm);font-size:var(--fs-sm);color:var(--text-dim)}
-.mr{display:grid;grid-template-columns:170px 1fr auto auto;align-items:center;gap:9px;background:var(--surface);border:2px solid var(--border);border-radius:var(--r);padding:12px 14px;transition:border-color .2s;scroll-margin-top:6px}
+.mr{display:grid;grid-template-columns:200px 1fr auto auto;align-items:center;gap:9px;background:var(--surface);border:2px solid var(--border);border-radius:var(--r);padding:16px 18px;transition:border-color .2s;scroll-margin-top:6px}
 .mr.my{border-color:rgba(0,212,255,.4);background:rgba(0,212,255,.04)}
 .mr.act{border-color:var(--green);background:rgba(0,230,118,.06);box-shadow:0 0 14px rgba(0,230,118,.14)}
 .mr.dn{opacity:.45}
-.ml-lbl{font-family:var(--fd);font-size:var(--fs-body);font-weight:700;color:var(--text);white-space:nowrap}
+.ml-lbl{font-family:var(--fd);font-size:var(--fs-pit);font-weight:700;color:var(--text);white-space:nowrap}
 .ml-teams{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
-.chip{border-radius:4px;padding:4px 10px;font-family:var(--fd);font-size:var(--fs-body);font-weight:700;border:2px solid;white-space:nowrap}
+.chip{border-radius:4px;padding:6px 14px;font-family:var(--fd);font-size:var(--fs-pit);font-weight:700;border:2px solid;white-space:nowrap}
 .cb{background:rgba(25,118,210,.15);border-color:rgba(25,118,210,.5);color:#90caf9}
 .cr{background:rgba(198,40,40,.15);border-color:rgba(198,40,40,.5);color:#ef9a9a}
 .cm{background:rgba(255,214,0,.15);border-color:rgba(255,214,0,.6);color:var(--yellow);font-weight:900}
-.mscore{font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.mscore{font-family:var(--fd);font-size:var(--fs-pit);font-weight:700;display:flex;align-items:center;gap:5px;white-space:nowrap}
 .scb{color:#64b5f6}.scr{color:#ef9a9a}.scs{color:var(--text-dim)}
 .mtime{font-family:var(--fm);font-size:var(--fs-sm);color:var(--text-dim);white-space:nowrap;text-align:right}
 .badge{font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:4px;border:2px solid;white-space:nowrap}
@@ -241,12 +243,12 @@ body[data-theme="custom"].has-bg::before{
 .tp::-webkit-scrollbar{width:4px}
 .tp::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 .rt{width:100%;border-collapse:collapse}
-.rt th{font-family:var(--fd);font-size:var(--fs-body);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);padding:0 0 10px;text-align:left;border-bottom:2px solid var(--border)}
+.rt th{font-family:var(--fd);font-size:var(--fs-pit);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);padding:0 0 16px;text-align:left;border-bottom:2px solid var(--border)}
 .rt th:not(:first-child){text-align:right}
-.rt td{padding:10px 0;border-bottom:1px solid rgba(31,34,54,.8);font-size:var(--fs-body)}
-.rt td:not(:first-child){text-align:right;font-family:var(--fd);font-size:var(--fs-body);font-weight:700;color:var(--text-mid)}
-.rp{font-family:var(--fd);font-size:var(--fs-body);font-weight:700;color:var(--text-dim);min-width:36px;display:inline-block}
-.rn{font-family:var(--fd);font-weight:900;font-size:var(--fs-body);color:var(--text)}
+.rt td{padding:18px 0;border-bottom:1px solid rgba(31,34,54,.8);font-size:var(--fs-pit)}
+.rt td:not(:first-child){text-align:right;font-family:var(--fd);font-size:var(--fs-pit);font-weight:700;color:var(--text-mid)}
+.rp{font-family:var(--fd);font-size:var(--fs-pit);font-weight:700;color:var(--text-dim);min-width:52px;display:inline-block}
+.rn{font-family:var(--fd);font-weight:900;font-size:var(--fs-pit);color:var(--text)}
 .rn.me{color:var(--yellow)}
 .rme{background:rgba(255,214,0,.08)}
 .rme td:not(:first-child){color:var(--text)}
@@ -852,6 +854,20 @@ body[data-theme="custom"].has-bg::before{
 [data-theme="tj2"] .bkt-legend-card.bkt-legend-me .bkt-legend-hdr{background:rgba(255,214,0,.2);color:#ffeb3b}
 [data-theme="tj2"] .bkt-legend-card.bkt-legend-me .bkt-legend-teams{color:#ffeb3b}
 
+/* PIT FONT SIZE TOGGLE — .pit-xl applied to body */
+/* XL: match list items get bigger */
+body.pit-xl .ml-lbl,
+body.pit-xl .chip,
+body.pit-xl .mscore{ font-size:var(--fs-pit-xl) !important; }
+body.pit-xl .mr{ padding:20px 18px !important; }
+body.pit-xl .chip{ padding:8px 16px !important; }
+/* XL: rankings — only rank number and team number get bigger; W-L-T and RP stay normal */
+body.pit-xl .rn,
+body.pit-xl .rp{ font-size:var(--fs-pit-xl) !important; }
+body.pit-xl .rt td{ padding:22px 0 !important; }
+body.pit-xl .rt td:not(:first-child){ font-size:var(--fs-pit) !important; }
+body.pit-xl .rt th{ font-size:var(--fs-pit) !important; }
+
 </style>
 </head>
 <body>
@@ -996,8 +1012,9 @@ body[data-theme="custom"].has-bg::before{
   </div>
 
   <div class="footer">
-    <div class="ftr-note"><span style="color:var(--accent);font-weight:700;margin-right:8px">V1.0.1</span>Nexus refreshes every 15s &middot; TBA refreshes every 30s</div>
+    <div class="ftr-note"><span style="color:var(--accent);font-weight:700;margin-right:8px">V1.1.0</span>Nexus refreshes every 15s &middot; TBA refreshes every 30s</div>
     <div style="flex:1"></div>
+    <button class="s-btn" id="font-size-btn" onclick="togglePitFont()" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">🔤 Bigger Text</button>
     <button class="s-btn" id="stream-toggle-btn" onclick="toggleStreamVisibility()" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">📺 Hide Stream</button>
     <button class="s-btn" id="bracket-toggle-btn" onclick="toggleBracket()" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">🏆 Playoff Bracket</button>
     <div class="ftr-stamp" id="tk-stamp">&mdash;</div>
@@ -2282,6 +2299,22 @@ function rBracket(){
   </div>`;
 }
 
+
+// PIT FONT SIZE TOGGLE
+let pitFontXL = localStorage.getItem('pitfusion_fontxl') === '1';
+(function(){ if(pitFontXL) document.body.classList.add('pit-xl'); })();
+function togglePitFont(){
+  pitFontXL = !pitFontXL;
+  localStorage.setItem('pitfusion_fontxl', pitFontXL ? '1' : '0');
+  document.body.classList.toggle('pit-xl', pitFontXL);
+  const btn = document.getElementById('font-size-btn');
+  if(btn) btn.textContent = pitFontXL ? '🔤 Normal Text' : '🔤 Bigger Text';
+}
+// Apply correct button label on load
+document.addEventListener('DOMContentLoaded', ()=>{
+  const btn = document.getElementById('font-size-btn');
+  if(btn) btn.textContent = pitFontXL ? '🔤 Normal Text' : '🔤 Bigger Text';
+});
 
 // init() is called by setupLaunch() — not auto-invoked here
 </script>
