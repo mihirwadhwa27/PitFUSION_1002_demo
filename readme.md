@@ -45,8 +45,6 @@ Open `PitFUSION.html` in any text editor. At the **very top of the file** you'll
 // ── API Keys ─────────────────────────────────────────────────
 const NEXUS_KEY = 'YOUR_NEXUS_KEY';
 const TBA_KEY   = 'YOUR_TBA_KEY';
-// ── Version ──────────────────────────────────────────────────
-const VERSION   = 'V1.0';
 ```
 
 Replace `YOUR_NEXUS_KEY` and `YOUR_TBA_KEY` with your actual keys. That's the only code you need to touch.
