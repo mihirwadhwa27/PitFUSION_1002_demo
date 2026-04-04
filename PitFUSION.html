@@ -8,7 +8,7 @@
 const NEXUS_KEY = 'YOUR_NEXUS_API_KEY';
 const TBA_KEY   = 'YOUR_TBA_API_KEY';
 // ── Version ──────────────────────────────────────────────────
-const VERSION   = 'V1.2.0';
+const VERSION   = 'V1.2.1';
 // ─────────────────────────────────────────────────────────────
 </script>
 <html lang="en">
@@ -427,11 +427,16 @@ body.custom-has-bg[data-theme="custom"] .tp{
 [data-theme="tj2"] .col-l,
 [data-theme="tj2"] .sidebar,
 [data-theme="tj2"] .stream-bar,
-[data-theme="tj2"] .tab-bar,
 [data-theme="tj2"] .panel-m{
   background:rgba(255,255,255,0.55);
   backdrop-filter:blur(12px);
   -webkit-backdrop-filter:blur(12px);
+}
+[data-theme="tj2"] .tab-bar{
+  background:rgba(10,25,70,0.92);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border-color:rgba(255,255,255,0.15);
 }
 [data-theme="tj2"] .q-half{
   background:transparent;
@@ -809,11 +814,17 @@ body.custom-has-bg[data-theme="custom"] .tp{
 /* TJ2 — bracket round column headers */
 
 
-/* TJ2 — alert icons */
+/* TJ2 — tab bar text on dark navy background */
+[data-theme="tj2"] .tab-btn{color:rgba(255,255,255,0.5)}
+[data-theme="tj2"] .tab-btn.act{color:#ffffff;border-bottom-color:rgba(255,255,255,0.9)}
+[data-theme="tj2"] .tab-btn:hover:not(.act){color:rgba(255,255,255,0.75)}
+/* TJ2 — alert icons: bright on dark tab bar */
 [data-theme="tj2"] .alert-count-ann{color:#7ec8ff}
 [data-theme="tj2"] .alert-count-parts{color:#ffeb3b}
+[data-theme="tj2"] .alert-icon-lbl.dim{opacity:0.2}
+[data-theme="tj2"] .alert-icon-count.dim{opacity:0.2}
 /* TJ2 — played W/L/T colors */
-[data-theme="tj2"] .played-w{color:var(--green)}
+[data-theme="tj2"] .played-w{color:#ffffff;text-shadow:0 0 6px rgba(0,230,118,.5)}
 [data-theme="tj2"] .played-l{color:#ffaaaa}
 [data-theme="tj2"] .played-t{color:rgba(255,255,255,0.4)}
 
@@ -1692,7 +1703,7 @@ function rTeam(){
     html+=`<div class="sbl">Played (${played.length})</div>`;
     // Header row
     html+=`<div class="played-hdr">
-      <span>Match</span><span style="text-align:center;min-width:28px">W/L</span><span style="text-align:right">Score</span><span style="text-align:right;min-width:42px">RP</span>
+      <span>Match</span><span style="text-align:center;min-width:32px">W/L/T</span><span style="text-align:right">Score</span><span style="text-align:right;min-width:42px">RP</span>
     </div>`;
     played.forEach(m=>{
       const sc=sm[nl(m.label)];
