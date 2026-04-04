@@ -47,7 +47,7 @@ const NEXUS_KEY = 'YOUR_NEXUS_KEY';
 const TBA_KEY   = 'YOUR_TBA_KEY';
 ```
 
-This is the only file you need to edit for initial setup. The version number lives in `PitFUSION.html` and updates automatically on each release.
+This is the only file you need to edit for initial setup.
 
 ### 3. Add a Logo (Optional)
 
