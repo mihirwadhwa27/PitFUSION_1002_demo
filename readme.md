@@ -236,9 +236,9 @@ See the full [Custom Theme Guide](docs/PitFusion_Custom_Theme.md) for all variab
 
 |||
 |-|-|
-|[!\[Main Screen](docs/MainScreen1.png)](docs/MainScreen1.png)|[!\[Bracket View](docs/BracketView1.png)](docs/BracketView1.png)|
+|[![Main Screen](docs/MainScreen1.png)](docs/MainScreen1.png)|[![Bracket View](docs/BracketView1.png)](docs/BracketView1.png)|
 |Main display|Playoff bracket|
-|[!\[Team View](docs/TeamView1.png)](docs/TeamView1.png)|[!\[Alerts View](docs/AlertsView1.png)](docs/AlertsView1.png)|
+|[![Team View](docs/TeamView1.png)](docs/TeamView1.png)|[![Alerts View](docs/AlertsView1.png)](docs/AlertsView1.png)|
 |My Team tab|Alerts tab|
 
 \---
