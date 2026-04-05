@@ -6,7 +6,7 @@
 <script src="config.js"></script>
 <script>
 // ── Version ──────────────────────────────────────────────────
-const VERSION = 'V1.6.2';
+const VERSION = 'V1.6.9';
 // ─────────────────────────────────────────────────────────────
 </script>
 <html lang="en">
@@ -75,20 +75,20 @@ document.addEventListener('DOMContentLoaded',()=>{
 /* Background image: FRC88Background.png in same directory as this .html file */
 [data-theme="tj2"]{
   --bg:transparent;
-  --surface:rgba(255,255,255,0.18);
-  --surface2:rgba(255,255,255,0.12);
-  --border:rgba(255,255,255,0.30);
-  --border2:rgba(255,255,255,0.45);
-  --accent:#1a4fa3;       /* TJ² Royal Blue */
-  --accent2:#e86a10;      /* TJ² Orange */
-  --green:#1a7a3a;
-  --yellow:#e8a800;       /* TJ² Gold/Yellow */
-  --red:#c0311a;          /* TJ² Red */
-  --blue-a:#1a4fa3;
+  --surface:rgba(13,30,61,0.93);    /* Navy panel — opaque, no bleed-through */
+  --surface2:rgba(8,20,48,0.95);
+  --border:rgba(255,255,255,0.18);
+  --border2:rgba(255,255,255,0.32);
+  --accent:#f5c000;        /* TJ² Gold — primary highlight */
+  --accent2:#e86a10;       /* TJ² Orange */
+  --green:#2ecc71;
+  --yellow:#f5c000;        /* TJ² Gold */
+  --red:#c0311a;           /* TJ² Red */
+  --blue-a:#2a6fd4;
   --red-a:#c0311a;
-  --text:#1a1a1a;         /* Dark text — readable over light bg */
-  --text-dim:#3a3a3a;
-  --text-mid:#2a2a2a;
+  --text:#ffffff;           /* White text on dark navy panels */
+  --text-dim:rgba(255,255,255,0.5);
+  --text-mid:rgba(255,255,255,0.75);
 }
 
 /* ── CUSTOM — edit these variables to your liking ── */
@@ -123,17 +123,9 @@ document.addEventListener('DOMContentLoaded',()=>{
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%;overflow:hidden}
 body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:var(--fs-body);-webkit-font-smoothing:antialiased}
-/* TJ2 — use the real tye-dye photo as body background */
+/* TJ2 — dark navy body, tye-dye only in the header */
 body[data-theme="tj2"]{
-  background-color: #f5e8d0;
-  /* Washout baked directly into background layers — no z-index fights */
-  background-image:
-    linear-gradient(rgba(255,255,255,0.42), rgba(255,255,255,0.42)),
-    url('FRC88Background.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  background-color: #060e1e;
 }
 /* Custom theme — background image baked in like TJ2 (no ::before, no has-bg) */
 /* When --custom-bg-image is set to a url(), it shows with the washout gradient on top */
@@ -174,6 +166,8 @@ body.custom-has-bg[data-theme="custom"] .tp{
 .hdr{background:var(--surface);border-bottom:3px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 var(--pad);gap:12px;overflow:hidden}
 .hdr-l,.hdr-r{display:flex;align-items:center;gap:12px;flex-shrink:0}
 .logo{font-family:var(--fd);font-size:var(--fs-hdr);font-weight:900;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.logo .wm-pit{color:var(--text)}
+.logo .wm-fusion{color:var(--accent)}
 .logo em{color:var(--accent);font-style:normal}
 .hdiv{width:2px;height:26px;background:var(--border2);flex-shrink:0}
 .hdr-ev{font-family:var(--fd);font-size:var(--fs-hdr);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:28vw}
@@ -376,6 +370,8 @@ body.custom-has-bg[data-theme="custom"] .tp{
 .setup-logo-img.loaded{display:block}
 .setup-wordmark{font-family:var(--fd);font-size:2.8rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;line-height:1}
 .setup-wordmark em{color:var(--accent);font-style:normal}
+.setup-wordmark .wm-pit{color:var(--text)}
+.setup-wordmark .wm-fusion{color:var(--accent)}
 .setup-sub{font-family:var(--fd);font-size:var(--fs-lbl);color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase}
 .setup-field{display:flex;flex-direction:column;gap:6px}
 .setup-label{font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim)}
@@ -420,21 +416,32 @@ body.custom-has-bg[data-theme="custom"] .tp{
 
 
 /* TJ2 theme — frosted glass panels over tye-dye photo */
-[data-theme="tj2"] .hdr,
 [data-theme="tj2"] .footer,
 [data-theme="tj2"] .col-l,
 [data-theme="tj2"] .sidebar,
 [data-theme="tj2"] .stream-bar,
 [data-theme="tj2"] .panel-m{
-  background:rgba(255,255,255,0.55);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-}
-[data-theme="tj2"] .tab-bar{
-  background:rgba(10,25,70,0.92);
+  background:rgba(13,30,61,0.93);
   backdrop-filter:blur(12px);
   -webkit-backdrop-filter:blur(12px);
   border-color:rgba(255,255,255,0.15);
+}
+/* TJ2 — tye-dye photo in the header */
+[data-theme="tj2"] .hdr{
+  background-color:#f5e8d0;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.38),rgba(0,0,0,0.38)),
+    url('FRC88Background.png');
+  background-size:cover;
+  background-position:center top;
+  background-repeat:no-repeat;
+  border-bottom-color:rgba(245,192,0,0.5);
+}
+[data-theme="tj2"] .tab-bar{
+  background:rgba(8,20,48,0.97);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border-color:rgba(255,255,255,0.12);
 }
 [data-theme="tj2"] .q-half{
   background:transparent;
@@ -445,79 +452,81 @@ body.custom-has-bg[data-theme="custom"] .tp{
 [data-theme="tj2"] #setup-page .setup-card{
   position:relative;
   z-index:1;
-  background:rgba(255,255,255,0.22);
-  border-color:rgba(255,255,255,0.4);
+  background:rgba(13,30,61,0.90);
+  border-color:rgba(245,192,0,0.4);
   backdrop-filter:blur(14px);
   -webkit-backdrop-filter:blur(14px);
 }
-/* TJ2 — setup page text and inputs use team colors over tye-dye */
 [data-theme="tj2"] #setup-page .setup-wordmark{
-  color:#1a1a1a;
+  color:#ffffff;
 }
 [data-theme="tj2"] #setup-page .setup-wordmark em{
-  color:var(--accent);
+  color:#f5c000;
 }
 [data-theme="tj2"] #setup-page .setup-sub{
-  color:#3a3a3a;
+  color:rgba(255,255,255,0.65);
 }
 [data-theme="tj2"] #setup-page .setup-label{
-  color:#2a2a2a;
+  color:rgba(255,255,255,0.85);
 }
 [data-theme="tj2"] #setup-page .setup-hint{
-  color:#444444;
+  color:rgba(255,255,255,0.5);
 }
 [data-theme="tj2"] #setup-page .setup-input,
 [data-theme="tj2"] #setup-page .setup-select{
-  background:rgba(255,255,255,0.75);
-  border-color:rgba(26,79,163,0.5);
-  color:#111827;
+  background:rgba(255,255,255,0.08);
+  border-color:rgba(245,192,0,0.4);
+  color:#ffffff;
 }
 [data-theme="tj2"] #setup-page .setup-input:focus,
 [data-theme="tj2"] #setup-page .setup-select:focus{
-  border-color:var(--accent);
+  border-color:#f5c000;
 }
 [data-theme="tj2"] #setup-page .setup-or{
-  color:#444444;
+  color:rgba(255,255,255,0.45);
 }
 [data-theme="tj2"] #setup-page .setup-or::before,
 [data-theme="tj2"] #setup-page .setup-or::after{
-  background:rgba(26,79,163,0.3);
+  background:rgba(245,192,0,0.3);
 }
 [data-theme="tj2"] #setup-page .theme-swatch-name{
-  color:#2a2a2a;
+  color:rgba(255,255,255,0.8);
 }
 [data-theme="tj2"] #setup-page .theme-swatch.active .theme-swatch-name{
-  color:var(--accent);
+  color:#f5c000;
 }
 [data-theme="tj2"] #setup-page .theme-swatch{
-  background:rgba(255,255,255,0.6);
-  border-color:rgba(26,79,163,0.3);
+  background:rgba(255,255,255,0.08);
+  border-color:rgba(255,255,255,0.2);
 }
 [data-theme="tj2"] #setup-page .theme-swatch.active{
-  border-color:var(--accent);
-  box-shadow:0 0 0 1px var(--accent);
+  border-color:#f5c000;
+  box-shadow:0 0 0 1px #f5c000;
 }
 [data-theme="tj2"] #setup-page .setup-btn{
-  background:var(--accent);
-  color:#ffffff;
+  background:#f5c000;
+  color:#0d1e3d;
 }
 
+[data-theme="tj2"] .hdr *{color:#ffffff}
+[data-theme="tj2"] .wm-pit{color:#ffffff !important}
+[data-theme="tj2"] .wm-fusion{color:#f5c000 !important}
 /* TJ2 — countdown pill: opaque so yellow is readable over the tye-dye */
 [data-theme="tj2"] .cd-pill{
-  background:rgba(255,255,255,0.92) !important;
-  border-color:rgba(26,79,163,0.6) !important;
+  background:rgba(13,30,61,0.95) !important;
+  border-color:rgba(245,192,0,0.6) !important;
   backdrop-filter:blur(4px);
   -webkit-backdrop-filter:blur(4px);
 }
 [data-theme="tj2"] .cd-pill .cd-lbl,
 [data-theme="tj2"] .cd-pill .cd-match{
-  color:#1a1a1a !important;
+  color:rgba(255,255,255,0.85) !important;
 }
 [data-theme="tj2"] .cd-pill .cd-val{
-  color:var(--accent) !important;
+  color:#f5c000 !important;
 }
 [data-theme="tj2"] .cd-pill .cd-val.urg{
-  color:var(--red) !important;
+  color:#c0311a !important;
 }
 /* TJ2 — match list: royal blue opaque background */
 [data-theme="tj2"] .panel-m{
@@ -553,12 +562,12 @@ body.custom-has-bg[data-theme="custom"] .tp{
 }
 /* TJ2 — playoff bracket */
 [data-theme="tj2"] #bracket-panel{
-  background:rgba(26,79,163,0.88) !important;
+  background:rgba(4,10,28,0.97) !important;
   backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
 }
 [data-theme="tj2"] .bkt-card{
-  background:rgba(20,60,130,0.92);
-  border-color:rgba(255,255,255,0.2);
+  background:rgba(8,20,52,0.97);
+  border-color:rgba(255,255,255,0.18);
 }
 [data-theme="tj2"] .bkt-card.bkt-card-my{
   border-color:rgba(232,168,0,0.75);
@@ -604,19 +613,19 @@ body.custom-has-bg[data-theme="custom"] .tp{
   color:#ffffff !important;
 }
 [data-theme="tj2"] .rn.me{
-  color:#ffeb3b;
-  text-shadow:0 0 8px rgba(255,220,0,0.6);
+  color:#f5c000;
+  text-shadow:none;
 }
 /* TJ2 — My Team tab: alliance chips readable on blue */
 [data-theme="tj2"] .cb{
-  background:rgba(100,180,255,0.25);
-  border-color:rgba(120,200,255,0.7);
-  color:#d0eeff;
+  background:rgba(42,111,212,0.30);
+  border-color:rgba(100,180,255,0.65);
+  color:#c8e4ff;
 }
 [data-theme="tj2"] .cr{
-  background:rgba(255,120,100,0.25);
-  border-color:rgba(255,150,130,0.7);
-  color:#ffe0da;
+  background:rgba(192,49,26,0.30);
+  border-color:rgba(255,120,100,0.65);
+  color:#ffd0c8;
 }
 [data-theme="tj2"] .cm{
   background:rgba(255,220,0,0.25);
@@ -669,7 +678,7 @@ body.custom-has-bg[data-theme="custom"] .tp{
 [data-theme="tj2"] .a-team.me{
   background:rgba(26,79,163,0.85);
   color:#ffeb3b;
-  text-shadow:0 0 8px rgba(255,220,0,0.5);
+  
   outline:2px solid rgba(255,255,255,0.7);
   outline-offset:1px;
   border-radius:4px;
@@ -805,9 +814,10 @@ body.custom-has-bg[data-theme="custom"] .tp{
 [data-theme="tj2"] .played-dim{
   color:rgba(255,255,255,0.4);
 }
-[data-theme="tj2"] .played-rp{
-  color:#ffffff !important;  /* override inline rpColor for base; accent/green stay via inline */
-}
+[data-theme="tj2"] .played-rp[data-rp="0"]{color:rgba(255,255,255,0.35) !important}
+[data-theme="tj2"] .played-rp[data-rp="1"]{color:rgba(255,255,255,0.85) !important}
+[data-theme="tj2"] .played-rp[data-rp="2"]{color:#f5c000 !important}
+[data-theme="tj2"] .played-rp[data-rp="3plus"]{color:#2ecc71 !important}
 
 /* TJ2 — bracket round column headers */
 
@@ -1003,7 +1013,7 @@ body.pit-xl .rt th{ font-size:var(--fs-pit) !important; }
   <div class="setup-card">
     <div class="setup-logo-wrap">
       <img id="setup-logo-img" class="setup-logo-img" alt="Team Logo">
-      <div class="setup-wordmark">Pit<em>Fusion</em></div>
+      <div class="setup-wordmark"><span class="wm-pit">Pit</span><span class="wm-fusion">FUSION</span></div>
       <div class="setup-sub">FRC Pit Display</div>
     </div>
 
@@ -1063,7 +1073,7 @@ body.pit-xl .rt th{ font-size:var(--fs-pit) !important; }
 <div id="app" style="display:none">
   <div class="hdr">
     <div class="hdr-l">
-      <div class="logo">Pit<em>Fusion</em></div>
+      <div class="logo"><span class="wm-pit">Pit</span><span class="wm-fusion">FUSION</span></div>
       <div class="hdiv"></div>
       <div class="hdr-ev" id="hdr-ev">&mdash;</div>
     </div>
@@ -1894,7 +1904,7 @@ function rTeam(){
         <span class="played-match">${e(m.label)}${vidKey?'<span style="font-size:0.8em;margin-left:4px;opacity:0.6">&#9654;</span>':''}</span>
         <span class="${wltCls}">${wlt}</span>
         <span style="text-align:right">${sc?`<span class="played-blue">${sc.blue}</span><span class="played-sep"> &ndash; </span><span class="played-red">${sc.red}</span>`:'<span class="played-dim">&mdash;</span>'}</span>
-        <span class="played-rp" style="color:${rpColor}">${rpDisplay}</span>
+        <span class="played-rp" data-rp="${myRp==null?'null':myRp>=3?'3plus':myRp}" style="color:${rpColor}">${rpDisplay}</span>
       </div>`;
     });
   }
@@ -2721,7 +2731,6 @@ async function openPitMap(team){
         `https://frc.nexus/api/v1/event/${C.event}/map`,
         hn(C.nexus));
     } catch(err){
-      console.log('[PitFUSION] pit map fetch result:', err.message||err);
       nexusPitMap = null;
     }
   }
@@ -2898,7 +2907,7 @@ async function openAllianceEpa(blueTeams, redTeams, matchLabel){
       ]);
       const teamYear = await tyR.json();
       const matches  = tmR.ok ? await tmR.json() : [];
-      const sorted   = (matches||[]).filter(m=>m.epa!=null).sort((a,b)=>{
+      const sorted   = (matches||[]).filter(m=>m.epa!=null&&m.status==='Completed').sort((a,b)=>{
         const ta=a.time||a.predicted_time||0, tb=b.time||b.predicted_time||0;
         if(ta&&tb&&ta!==tb) return ta-tb;
         const ek=(a.event||'').localeCompare(b.event||'');
@@ -2922,7 +2931,8 @@ async function openAllianceEpa(blueTeams, redTeams, matchLabel){
   function eventMatches(t){
     const d=teamData[t];
     if(!d) return [];
-    return (d.matches||[]).filter(m=>(m.event||m.event_key||'')=== eventKey);
+    const evMatches=(d.matches||[]).filter(m=>(m.event||m.event_key||'')=== eventKey);
+    return evMatches.filter(m=>m.status==='Completed');
   }
 
   // Helper: build pts array for one team + one field from event matches
@@ -3056,8 +3066,9 @@ function setEpaStatus(msg){
   if(b) b.innerHTML=`<div class="epa-loading">${msg}</div>`;
 }
 
-async function openEpa(team){
+async function openEpa(team, forceReload=false){
   if(!team) return;
+  team = String(team);
   const overlay  = document.getElementById('epa-overlay');
   const teamDisp = document.getElementById('epa-team-display');
   const cdSrc    = document.getElementById('hdr-cd');
@@ -3071,8 +3082,9 @@ async function openEpa(team){
   const year     = new Date().getFullYear();
   const cacheKey = `${team}_${year}`;
 
-  if(epaCache[cacheKey]&&(Date.now()-epaCache[cacheKey].ts<EPA_CACHE_MS)){
+  if(!forceReload && epaCache[cacheKey]&&(Date.now()-epaCache[cacheKey].ts<EPA_CACHE_MS)){
     renderEpa(epaCache[cacheKey], team, year); return;
+  if(forceReload) delete epaCache[cacheKey];
   }
 
   // ── Step 1: Fetch team_year summary ─────────────────────────────────────────
@@ -3099,8 +3111,10 @@ async function openEpa(team){
   // ── Step 3: Fetch match history — render each chart as data arrives ──────────
   let matches=[];
   try {
+    // Default: fetch only current event (fast). Full season loads on toggle.
+    const evParam = epaShowCurrentOnly ? `&event=${C.event}` : `&limit=200`;
     const tmResp = await fetchWithRetry(
-      `https://api.statbotics.io/v3/team_matches?team=${team}&year=${year}&limit=200`, 12000, 3);
+      `https://api.statbotics.io/v3/team_matches?team=${team}&year=${year}${evParam}`, 12000, 3);
     matches = await tmResp.json();
   } catch(e){
     // Timed out — charts stay as skeletons with current values, offer retry
@@ -3121,7 +3135,7 @@ async function openEpa(team){
 
   // Sort matches chronologically
   matches = (matches||[])
-    .filter(m=>m.epa!=null)
+    .filter(m=>m.epa!=null&&m.status==='Completed')
     .sort((a,b)=>{
       const ta=a.time||a.predicted_time||0;
       const tb=b.time||b.predicted_time||0;
@@ -3131,7 +3145,7 @@ async function openEpa(team){
       return (a.match_number||0)-(b.match_number||0);
     });
 
-  const cached={teamYear, matches, ts:Date.now()};
+  const cached={teamYear, matches, ts:Date.now(), eventOnly:epaShowCurrentOnly};
   epaCache[cacheKey]=cached;
 
   // Fill in charts one at a time with a small delay so the browser paints each
@@ -3213,6 +3227,10 @@ function renderEpaShell(teamYear, team, year){
       style="font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;padding:5px 14px;cursor:pointer">
       ${epaShowCurrentOnly?'Show All Events':'Show Current Event Only'}
     </button>
+    <button onclick="openEpa('${team}',true)"
+      style="font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;padding:5px 14px;
+      background:var(--surface2);border:2px solid var(--border2);border-radius:var(--r);
+      color:var(--text-dim);cursor:pointer" title="Force reload from Statbotics">↻ Reload</button>
     <span id="epa-ev-badge" class="epa-ev-count"></span>
     <span id="epa-match-status" style="font-family:var(--fd);font-size:var(--fs-sm);color:var(--text-dim)">Loading match history\u2026</span>
   </div>`;
@@ -3252,7 +3270,7 @@ function renderEpaShell(teamYear, team, year){
 function drawLineChart(id, pts, color, currentVal, eventBands){
   if(pts.length<2) return `<div style="font-family:var(--fd);font-size:var(--fs-sm);color:var(--text-dim);padding:8px 0">Not enough match data yet — current: <b style="color:${color}">${currentVal!=null?Number(currentVal).toFixed(1):'—'}</b></div>`;
 
-  const W=680,H=160,PL=46,PR=56,PT=10,PB=26;
+  const W=680,H=175,PL=46,PR=56,PT=24,PB=26; // PT=24 reserves space for event labels above plot
   const cW=W-PL-PR, cH=H-PT-PB;
   const n=pts.length;
   const allV=pts.map(p=>p.val);
@@ -3277,13 +3295,13 @@ function drawLineChart(id, pts, color, currentVal, eventBands){
     svg+=`<line x1="${x.toFixed(1)}" y1="${PT}" x2="${x.toFixed(1)}" y2="${(PT+cH)}" stroke="var(--border2)" stroke-width="1" stroke-dasharray="3,2"/>`;
     // Rotated event label
     const lx=(xOf(band.startX)+xOf(band.endX))/2;
-    svg+=`<text x="${lx.toFixed(1)}" y="${(PT+8)}" font-family="var(--fd)" font-size="8" fill="var(--text-dim)" text-anchor="middle" opacity="0.7">${e(band.shortLabel||band.label)}</text>`;
+    svg+=`<text x="${lx.toFixed(1)}" y="${(PT-6)}" font-family="var(--fd)" font-size="9" font-weight="700" fill="var(--text-dim)" text-anchor="middle" opacity="0.85">${e(band.shortLabel||band.label)}</text>`;
   });
   // First event label
   if(eventBands.length>0){
     const b=eventBands[0];
     const lx=(xOf(b.startX)+xOf(b.endX))/2;
-    svg+=`<text x="${lx.toFixed(1)}" y="${(PT+8)}" font-family="var(--fd)" font-size="8" fill="var(--text-dim)" text-anchor="middle" opacity="0.7">${e(b.shortLabel||b.label)}</text>`;
+    svg+=`<text x="${lx.toFixed(1)}" y="${(PT-6)}" font-family="var(--fd)" font-size="9" font-weight="700" fill="var(--text-dim)" text-anchor="middle" opacity="0.85">${e(b.shortLabel||b.label)}</text>`;
   }
 
   // Y grid
@@ -3353,23 +3371,51 @@ function hideEpaTip(){
 }
 
 // State for current-event toggle
-let epaShowCurrentOnly=false;
+let epaShowCurrentOnly=true;
 
-function toggleEpaCurrentOnly(){
+async function toggleEpaCurrentOnly(){
   epaShowCurrentOnly=!epaShowCurrentOnly;
   const btn=document.getElementById('epa-toggle-btn');
   if(btn){
     btn.textContent=epaShowCurrentOnly?'Show All Events':'Show Current Event Only';
     btn.dataset.active=epaShowCurrentOnly?'1':'0';
   }
-  // Refill charts with same cached data (shell already correct, just redo lines)
   const teamDisp=document.getElementById('epa-team-display');
   const team=teamDisp?.textContent.replace('Team ','').trim();
   if(!team) return;
   const year=new Date().getFullYear();
-  const cached=epaCache[`${team}_${year}`];
+  const cacheKey=`${team}_${year}`;
+  const cached=epaCache[cacheKey];
+
+  // If switching to full season and we only have current-event data, fetch the rest
+  if(!epaShowCurrentOnly && cached && cached.eventOnly){
+    // Reset slots to skeleton while loading
+    const cfgFields=(typeof EPA_FIELDS!=='undefined')
+      ?(EPA_FIELDS[year]||EPA_FIELDS[Math.max(...Object.keys(EPA_FIELDS).map(Number))])
+      :null;
+    if(cfgFields) cfgFields.forEach((_,fi)=>{
+      const slot=document.getElementById(`epa-slot-${fi}`);
+      if(slot) slot.innerHTML=`<div style="height:40px;background:var(--surface2);border-radius:4px;display:flex;align-items:center;justify-content:center"><span style="font-family:var(--fd);font-size:var(--fs-sm);color:var(--text-dim)">Loading full season…</span></div>`;
+    });
+    // Fetch full season
+    try {
+      const tmResp=await fetchWithRetry(
+        `https://api.statbotics.io/v3/team_matches?team=${team}&year=${year}&limit=200`,12000,3);
+      const allMatches=await tmResp.json();
+      cached.matches=(allMatches||[]).filter(m=>m.epa!=null&&m.status==='Completed')
+        .sort((a,b)=>{
+          const ta=a.time||0,tb=b.time||0;
+          if(ta&&tb&&ta!==tb) return ta-tb;
+          return (a.event||'').localeCompare(b.event||'')||(a.match_number||0)-(b.match_number||0);
+        });
+      cached.eventOnly=false;
+    } catch(e){
+      const note=document.getElementById('epa-match-status');
+      if(note) note.textContent='Could not load full season data';
+    }
+  }
+
   if(cached){
-    // Reset slots to skeleton
     const cfgFields=(typeof EPA_FIELDS!=='undefined')
       ?(EPA_FIELDS[year]||EPA_FIELDS[Math.max(...Object.keys(EPA_FIELDS).map(Number))])
       :null;
@@ -3389,7 +3435,7 @@ function renderEpa(cached, team, year){
 
 async function _fillEpaCharts(cached, team, year){
   const matches=(cached.matches||[])
-    .filter(m=>m.epa!=null)
+    .filter(m=>m.epa!=null&&m.status==='Completed')
     .sort((a,b)=>{
       const ta=a.time||a.predicted_time||0;
       const tb=b.time||b.predicted_time||0;
@@ -3443,7 +3489,9 @@ async function _fillEpaCharts(cached, team, year){
       const mn=mkParts?(mkParts[2]!=null?`${mkParts[2]}-${mkParts[3]}`:mkParts[4]):(m.match_number||i+1);
       const compLabel=comp==='qm'?'Qual':comp==='sf'?'SF':comp==='f'?'Final':comp.toUpperCase();
       const evShort=ek.replace(/^\d{4}/,'');
-    }).filter(p=>p.val!=null&&typeof p.val==='number'&&isFinite(p.val));
+      const matchLabel=`${evShort} ${compLabel} ${mn}`;
+      return {x:i, val, matchLabel};
+    }).filter(p=>p&&p.val!=null&&typeof p.val==='number'&&isFinite(p.val));
 
     const curVal=getPath(cached.teamYear,f.key);
     const slot=document.getElementById(`epa-slot-${fi}`);
