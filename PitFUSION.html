@@ -6,7 +6,7 @@
 <script src="config.js"></script>
 <script>
 // ── Version ──────────────────────────────────────────────────
-const VERSION = 'V1.8.6';
+const VERSION = 'V1.8.7';
 // ─────────────────────────────────────────────────────────────
 </script>
 <html lang="en">
@@ -278,7 +278,7 @@ body.custom-has-bg[data-theme="custom"] .tp{
 .bx{background:rgba(107,120,153,.12);color:var(--text);border-color:var(--border)}
 
 /* SIDEBAR */
-.sidebar{display:flex;flex-direction:column;background:var(--bg);overflow:hidden;min-height:0}
+.sidebar{display:flex;flex-direction:column;background:var(--bg);overflow:hidden;min-height:0;}
 .tab-bar{flex-shrink:0;display:flex;background:var(--surface);border-bottom:2px solid var(--border)}
 .tab-btn{flex:1;padding:8px 6px;background:transparent;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;color:var(--text-dim);font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:all .15s;line-height:1.3}
 .tab-btn.act{color:var(--accent);border-bottom-color:var(--accent)}
@@ -306,7 +306,8 @@ body.custom-has-bg[data-theme="custom"] .tp{
 .rn.me{color:var(--yellow)}
 .rme{background:rgba(255,214,0,.08)}
 .rme td:not(:first-child){color:var(--text)}
-.upcoming-panel{margin-top:14px}
+.upcoming-panel{flex-shrink:0;border-top:2px solid var(--border);padding:10px var(--pad) var(--pad);background:var(--bg)}
+[data-theme="tj2"] .upcoming-panel{background:rgba(8,20,48,0.97);border-top-color:rgba(255,255,255,0.12)}
 .upcoming-hdr{font-family:var(--fd);font-size:var(--fs-pit);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);padding-bottom:8px;border-bottom:2px solid var(--border);margin-bottom:6px}
 .up-row{border-radius:6px;padding:6px 8px;margin-bottom:5px;background:var(--surface)}
 .up-row:nth-child(odd){background:var(--surface2)}
@@ -1195,10 +1196,6 @@ body.pit-xl .rt th{ font-size:var(--fs-pit) !important; }
       <div class="tp act" id="tab-rankings">
         <div class="sbl" style="margin-top:0">Event Rankings</div>
         <div id="rank-content"><div class="skel" style="width:100%"></div><div class="skel" style="width:78%"></div><div class="skel" style="width:88%"></div></div>
-        <div class="upcoming-panel">
-          <div class="upcoming-hdr">Upcoming</div>
-          <div id="upcoming-content"></div>
-        </div>
       </div>
       <div class="tp" id="tab-team"><div id="team-content"></div></div>
       <div class="tp" id="tab-alerts">
@@ -1211,6 +1208,11 @@ body.pit-xl .rt th{ font-size:var(--fs-pit) !important; }
       <div class="tp" id="tab-queuing" style="display:none">
         <div id="q-display-sidebar"></div>
         <div id="bumper-box-sidebar" class="bumper-box" style="margin-top:10px">&mdash;</div>
+      </div>
+      <!-- Upcoming panel — always visible, sits below tabs -->
+      <div class="upcoming-panel" id="upcoming-panel-wrap">
+        <div class="upcoming-hdr">Upcoming</div>
+        <div id="upcoming-content"></div>
       </div>
     </div>
   </div>
