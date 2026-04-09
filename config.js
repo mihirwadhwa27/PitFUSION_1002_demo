@@ -5,7 +5,7 @@
 // ============================================================
 
 // ── API Keys ─────────────────────────────────────────────────
-const NEXUS_KEY = 'YOUR_NEXUS_KEY';
+const NEXUS_KEY = '5eWBMBIiRQWFZ-8iKbwHWE2xR9g';
 const TBA_KEY   = 'YOUR_TBA_KEY';
 
 // ── EPA Field Definitions by Year ────────────────────────────
