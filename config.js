@@ -6,7 +6,7 @@
 
 // ── API Keys ─────────────────────────────────────────────────
 const NEXUS_KEY = '5eWBMBIiRQWFZ-8iKbwHWE2xR9g';
-const TBA_KEY   = 'YOUR_TBA_KEY';
+const TBA_KEY   = 'kejKakMUnL2c3mj1MwwBoRn66nUpbXFMO4MMEvdM2Xu448wkLwwqzIMoyiyyUYqH';
 
 // ── EPA Field Definitions by Year ────────────────────────────
 // Each year maps to the EPA breakdown fields returned by Statbotics.
