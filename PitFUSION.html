@@ -185,7 +185,7 @@ body.custom-has-bg[data-theme="custom"] .tp{
 .cd-val.urg{color:var(--red);animation:pulsered .8s infinite alternate}
 @keyframes pulsered{from{opacity:1}to{opacity:.4}}
 .hdr-team{background:var(--surface2);border:2px solid var(--accent);border-radius:var(--r);padding:3px 14px;font-family:var(--fd);font-size:var(--fs-hdr);font-weight:900;color:var(--accent);white-space:nowrap}
-.delay-pill{border-radius:var(--r);padding:2px 10px;font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;white-space:nowrap}
+.delay-pill{border-radius:var(--r);padding:2px 14px;font-family:var(--fd);font-size:var(--fs-cd);font-weight:900;white-space:nowrap;line-height:1;letter-spacing:.03em}
 .delay-pill.ontime{background:rgba(46,204,113,.15);border:1px solid rgba(46,204,113,.4);color:#2ecc71}
 .delay-pill.ahead{background:rgba(46,204,113,.15);border:1px solid rgba(46,204,113,.4);color:#2ecc71}
 .delay-pill.minor{background:rgba(255,214,0,.15);border:1px solid rgba(255,214,0,.4);color:var(--yellow)}
@@ -1046,8 +1046,8 @@ body.pit-xl .rt th{ font-size:var(--fs-pit) !important; }
 #epa-overlay .epa-hdr,#alliance-overlay .epa-hdr,#pitmap-overlay .epa-hdr{height:var(--hdr-h);background:var(--surface);border-bottom:3px solid var(--border);display:flex;align-items:center;padding:0 var(--pad);gap:16px;flex-shrink:0}
 #epa-overlay .epa-title{font-family:var(--fd);font-size:var(--fs-hdr);font-weight:900;color:var(--text)}
 #epa-overlay .epa-team-num{font-family:var(--fd);font-size:var(--fs-hdr);font-weight:900;color:var(--accent)}
-#epa-overlay .epa-close,#alliance-overlay .epa-close,#pitmap-overlay .epa-close{margin-left:auto;background:var(--surface2);border:2px solid var(--border2);border-radius:var(--r);color:var(--text-dim);font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;padding:4px 14px;cursor:pointer;transition:all .15s}
-#epa-overlay .epa-close:hover,#alliance-overlay .epa-close:hover,#pitmap-overlay .epa-close:hover{color:var(--text);border-color:var(--text-mid)}
+#epa-overlay .epa-close,#alliance-overlay .epa-close,#pitmap-overlay .epa-close,#schedule-overlay .epa-close{margin-left:auto;background:var(--surface2);border:2px solid var(--border2);border-radius:var(--r);color:var(--text-dim);font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;padding:4px 14px;cursor:pointer;transition:all .15s}
+#epa-overlay .epa-close:hover,#alliance-overlay .epa-close:hover,#pitmap-overlay .epa-close:hover,#schedule-overlay .epa-close:hover{color:var(--text);border-color:var(--text-mid)}
 #epa-overlay .epa-body{flex:1;overflow-y:auto;padding:var(--pad);display:flex;flex-direction:column;gap:16px}
 .epa-bar-row{display:grid;grid-template-columns:180px 1fr 60px;align-items:center;gap:12px}
 .epa-bar-label{font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;color:var(--text-mid);text-align:right}
@@ -1310,7 +1310,7 @@ body.pit-xl .rt th{ font-size:var(--fs-pit) !important; }
     <div class="sched-hdr">
       <span class="sched-title">📋 Our Schedule</span>
       <span id="sched-team-lbl" style="font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;color:var(--text-dim)"></span>
-      <button class="epa-close" onclick="closeSchedule()" style="margin-left:auto">✕ Close</button>
+      <button class="epa-close" onclick="closeSchedule()">✕ Close</button>
     </div>
     <div class="sched-body">
       <table class="sched-table">
@@ -1875,17 +1875,18 @@ function updateScheduleDelay(mx, nowQ){
   const sched=qm.times.scheduledStartTime||qm.times.scheduledQueueTime;
   if(!est||!sched){el.textContent='';el.style.cssText='';return;}
   const delayMin=Math.round((est-sched)/60000);
+  const baseStyle='font-family:var(--fd);font-size:var(--fs-cd);font-weight:900;white-space:nowrap;border-radius:4px;padding:2px 14px;line-height:1;letter-spacing:.03em';
   if(Math.abs(delayMin)<1){
     el.textContent='On time';
-    el.style.cssText='font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;white-space:nowrap;background:rgba(46,204,113,.15);border:1px solid rgba(46,204,113,.4);color:#2ecc71;border-radius:4px;padding:2px 10px';
+    el.style.cssText=baseStyle+';background:rgba(46,204,113,.15);border:1px solid rgba(46,204,113,.4);color:#2ecc71';
     return;
   }
   if(delayMin>0){
     el.textContent=`+${delayMin}m behind`;
-    el.style.cssText=`font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;white-space:nowrap;border-radius:4px;padding:2px 10px;${delayMin>=15?'background:rgba(231,76,60,.18);border:1px solid rgba(231,76,60,.5);color:#ffffff':'background:rgba(255,214,0,.15);border:1px solid rgba(255,214,0,.4);color:var(--yellow)'}`;
+    el.style.cssText=baseStyle+';'+(delayMin>=15?'background:rgba(231,76,60,.18);border:1px solid rgba(231,76,60,.5);color:#ffffff':'background:rgba(255,214,0,.15);border:1px solid rgba(255,214,0,.4);color:var(--yellow)');
   } else {
     el.textContent=`${Math.abs(delayMin)}m ahead`;
-    el.style.cssText='font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;white-space:nowrap;background:rgba(46,204,113,.15);border:1px solid rgba(46,204,113,.4);color:#2ecc71;border-radius:4px;padding:2px 10px';
+    el.style.cssText=baseStyle+';background:rgba(46,204,113,.15);border:1px solid rgba(46,204,113,.4);color:#2ecc71';
   }
 }
 
@@ -3239,8 +3240,8 @@ function openSchedule(){
     const rowCls=isPlayed?'played':'upcoming';
     rows+=`<tr class="${rowCls}">
       <td class="sched-lbl">${e(m.label.replace(/^Qualification\s+/i,'Qual '))}</td>
-      <td>${blueChips}</td>
-      <td>${redChips}</td>
+      <td style="min-width:0"><div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px">${blueChips}</div></td>
+      <td style="min-width:0"><div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px">${redChips}</div></td>
       <td style="text-align:right">${resultCell}</td>
       <td class="sched-rp">${rpCell||'&mdash;'}</td>
     </tr>`;
