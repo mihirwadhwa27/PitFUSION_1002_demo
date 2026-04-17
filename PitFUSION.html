@@ -6,7 +6,7 @@
 <script src="config.js"></script>
 <script>
 // ── Version ──────────────────────────────────────────────────
-const VERSION = 'V1.9.2';
+const VERSION = 'V1.9.3';
 // ─────────────────────────────────────────────────────────────
 </script>
 <html lang="en">
@@ -209,14 +209,20 @@ body.custom-has-bg[data-theme="custom"] .tp{
 .hdr-clk{font-family:var(--fm);font-size:var(--fs-hdr);color:var(--text-mid);white-space:nowrap}
 
 /* BODY */
-.body{display:grid;grid-template-columns:1fr 380px;overflow:hidden;min-height:0}
-.col-l{display:flex;flex-direction:column;border-right:2px solid var(--border);overflow:hidden;min-height:0}
+.body{display:grid;grid-template-columns:1fr 5px 380px;overflow:hidden;min-height:0}
+.drag-handle-v{width:5px;background:var(--border);cursor:col-resize;flex-shrink:0;transition:background .15s;z-index:10;position:relative}
+.drag-handle-v:hover,.drag-handle-v.dragging{background:var(--accent)}
+.drag-handle-h{height:5px;background:var(--border);cursor:row-resize;flex-shrink:0;transition:background .15s;z-index:10}
+.drag-handle-h:hover,.drag-handle-h.dragging{background:var(--accent)}
+[data-theme="tj2"] .drag-handle-v:hover,[data-theme="tj2"] .drag-handle-v.dragging{background:#f5c000}
+[data-theme="tj2"] .drag-handle-h:hover,[data-theme="tj2"] .drag-handle-h.dragging{background:#f5c000}
+.col-l{display:grid;grid-template-rows:65vh 5px 1fr;border-right:2px solid var(--border);overflow:hidden;min-height:0}
 
 /* TOP ROW: stream + queuing side by side Change width of split here */
-.top-row{height: 65vh;flex-shrink:0;display:grid;grid-template-columns:75% 25%;border-bottom:2px solid var(--border)}
+.top-row{display:grid;grid-template-columns:75% 5px 25%;border-bottom:2px solid var(--border);overflow:hidden;min-height:0}
 
 /* STREAM */
-.stream-half{display:flex;flex-direction:column;border-right:2px solid var(--border);background:#000;overflow:hidden}
+.stream-half{display:flex;flex-direction:column;border-right:2px solid var(--border);background:#000;overflow:hidden;min-height:0}
 .stream-bar{flex-shrink:0;background:var(--surface);border-bottom:2px solid var(--border);padding:5px var(--pad);display:flex;align-items:center;justify-content:space-between;gap:8px}
 .stream-bar-l{display:flex;align-items:center;gap:8px}
 .s-lbl{font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-mid)}
@@ -229,7 +235,7 @@ body.custom-has-bg[data-theme="custom"] .tp{
 .s-nowc{flex:1;display:flex;align-items:center;justify-content:center;font-size:var(--fs-sm);color:var(--text-dim);background:var(--surface);padding:var(--pad);text-align:center}
 
 /* QUEUING */
-.q-half{background:var(--bg);padding:var(--pad);display:flex;flex-direction:column;gap:7px;padding-bottom:calc(var(--pad) + 12px)}
+.q-half{background:var(--bg);padding:var(--pad);display:flex;flex-direction:column;gap:7px;padding-bottom:calc(var(--pad) + 12px);overflow-y:auto;min-height:0}
 .sec-lbl{font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);flex-shrink:0}
 .now-q{font-family:var(--fd);font-size:var(--fs-hero);font-weight:900;color:var(--accent);line-height:.95;letter-spacing:-.01em}
 .not-q{font-family:var(--fd);font-size:var(--fs-big);font-weight:600;color:var(--text-dim)}
@@ -253,7 +259,7 @@ body.custom-has-bg[data-theme="custom"] .tp{
 .panel-m{flex:1;overflow-y:auto;padding:var(--pad);background:var(--bg);min-height:0;scroll-behavior:smooth}
 .panel-m::-webkit-scrollbar{width:4px}
 .panel-m::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-.ml{display:flex;flex-direction:column;gap:4px}
+.ml{display:flex;flex-direction:column;gap:4px;overflow-y:auto;min-height:0;padding:var(--pad)}
 .ml-break{display:flex;align-items:center;gap:8px;padding:5px 10px;color:var(--yellow);font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,214,0,.07);border-radius:4px;border-left:3px solid rgba(255,214,0,.4)}
 [data-theme="tj2"] .ml-break{background:rgba(245,192,0,.1);border-left-color:#f5c000}
 .msh{font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);padding:10px 0 6px;border-bottom:2px solid var(--border);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
@@ -1189,8 +1195,8 @@ body.pit-xl .rt th{ font-size:var(--fs-pit) !important; }
     </div>
   </div>
 
-  <div class="body">
-    <div class="col-l">
+  <div class="body" id="body-row">
+    <div class="col-l" id="col-l">
       <div class="top-row" id="top-row">
 
         <!-- Stream -->
@@ -1208,7 +1214,8 @@ body.pit-xl .rt th{ font-size:var(--fs-pit) !important; }
         </div>
 
         <!-- Queuing -->
-        <div class="q-half">
+        <div class="drag-handle-v" id="drag-v2" title="Drag to resize"></div>
+      <div class="q-half">
           <div class="sec-lbl">Queuing Status</div>
           <div id="q-display"></div>
           <div id="bumper-box" class="bumper-box">&mdash;</div>
@@ -1220,11 +1227,13 @@ body.pit-xl .rt th{ font-size:var(--fs-pit) !important; }
         <div style="margin-bottom:7px">
           <div class="sec-lbl" id="panel-m-title">Match Schedule</div>
         </div>
-        <div class="ml" id="ml"></div>
+        <div class="drag-handle-h" id="drag-h" title="Drag to resize"></div>
+      <div class="ml" id="ml"></div>
         <div id="bracket-panel" style="display:none;height:100%;overflow:hidden"></div>
       </div>
     </div>
 
+    <div class="drag-handle-v" id="drag-v" title="Drag to resize"></div>
     <div class="sidebar">
       <div class="tab-bar">
         <button class="tab-btn act" onclick="switchTab('rankings',this)">Rankings</button>
@@ -3819,6 +3828,91 @@ async function checkForUpdate(){
     // Network error or rate limited — silently ignore
   }
 }
+
+// ── RESIZABLE PANELS ────────────────────────────────────────────────────────
+(function(){
+  const LS = 'pitfusion_layout_sizes';
+  const DEFAULTS = { sidebarW: 380, topRowH: 65, streamW: 75 };
+  let sizes = DEFAULTS;
+  try { const s=JSON.parse(localStorage.getItem(LS)||'{}'); sizes={...DEFAULTS,...s}; } catch{}
+
+  function applyLayout(){
+    const body=document.getElementById('body-row');
+    const topRow=document.getElementById('top-row');
+    if(body) body.style.gridTemplateColumns=`1fr 5px ${sizes.sidebarW}px`;
+    if(topRow) topRow.style.gridTemplateColumns=`${sizes.streamW}% 5px ${100-sizes.streamW}%`;
+    const colL=document.getElementById('col-l');
+    if(colL) colL.style.gridTemplateRows=`${sizes.topRowH}vh 5px 1fr`;
+  }
+
+  function saveLayout(){ try{ localStorage.setItem(LS, JSON.stringify(sizes)); }catch{} }
+
+  function makeDrag(handleId, onDrag){
+    const el=document.getElementById(handleId);
+    if(!el) return;
+    let startX, startY, startVal;
+    const down=e=>{
+      e.preventDefault();
+      el.classList.add('dragging');
+      startX=e.touches?e.touches[0].clientX:e.clientX;
+      startY=e.touches?e.touches[0].clientY:e.clientY;
+      startVal=onDrag.getVal();
+      document.addEventListener('mousemove', move); document.addEventListener('touchmove', move, {passive:false});
+      document.addEventListener('mouseup', up); document.addEventListener('touchend', up);
+    };
+    const move=e=>{
+      e.preventDefault();
+      const x=e.touches?e.touches[0].clientX:e.clientX;
+      const y=e.touches?e.touches[0].clientY:e.clientY;
+      onDrag.drag(x-startX, y-startY, startVal);
+      applyLayout();
+    };
+    const up=()=>{
+      el.classList.remove('dragging');
+      document.removeEventListener('mousemove',move); document.removeEventListener('touchmove',move);
+      document.removeEventListener('mouseup',up); document.removeEventListener('touchend',up);
+      saveLayout();
+    };
+    el.addEventListener('mousedown',down); el.addEventListener('touchstart',down,{passive:false});
+  }
+
+  // Vertical: sidebar width
+  makeDrag('drag-v',{
+    getVal:()=>sizes.sidebarW,
+    drag:(dx,dy,start)=>{ sizes.sidebarW=Math.max(260,Math.min(600,start-dx)); }
+  });
+
+  // Vertical: stream vs q-half width
+  makeDrag('drag-v2',{
+    getVal:()=>sizes.streamW,
+    drag:(dx,dy,start)=>{
+      const totalW=document.getElementById('top-row')?.clientWidth||1000;
+      sizes.streamW=Math.max(40,Math.min(85,start+(dx/totalW)*100));
+    }
+  });
+
+  // Horizontal: top-row vs match list height
+  makeDrag('drag-h',{
+    getVal:()=>sizes.topRowH,
+    drag:(dx,dy,start)=>{
+      const totalH=document.getElementById('col-l')?.clientHeight||600;
+      const newVh=(start/100*totalH+dy)/window.innerHeight*100;
+      sizes.topRowH=Math.max(25,Math.min(80,newVh));
+    }
+  });
+
+  // Double-click to reset
+  ['drag-v','drag-v2','drag-h'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.addEventListener('dblclick',()=>{
+      sizes={...DEFAULTS};
+      applyLayout(); saveLayout();
+    });
+  });
+
+  // Apply on load
+  applyLayout();
+})();
 </script>
 </body>
 </html>
