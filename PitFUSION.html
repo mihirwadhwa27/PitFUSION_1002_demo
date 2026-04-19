@@ -6,7 +6,7 @@
 <script src="config.js"></script>
 <script>
 // ── Version ──────────────────────────────────────────────────
-const VERSION = 'V1.8.8';
+const VERSION = 'V1.9.5';
 // ─────────────────────────────────────────────────────────────
 </script>
 <html lang="en">
@@ -152,11 +152,7 @@ body.custom-has-bg[data-theme="custom"] .col-l,
 body.custom-has-bg[data-theme="custom"] .sidebar,
 body.custom-has-bg[data-theme="custom"] .stream-bar,
 body.custom-has-bg[data-theme="custom"] .tab-bar,
-body.custom-has-bg[data-theme="custom"] .panel-m{
-  background:rgba(var(--custom-bg-washout-color, 0,0,0), 0.55);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-}
+body.custom-has-bg[data-theme="custom"] .panel-m{display:flex;flex-direction:column;overflow:hidden;min-height:0}
 body.custom-has-bg[data-theme="custom"] .tp{
   background:rgba(var(--custom-bg-washout-color, 0,0,0), 0.55);
 }
@@ -185,7 +181,7 @@ body.custom-has-bg[data-theme="custom"] .tp{
 .cd-val.urg{color:var(--red);animation:pulsered .8s infinite alternate}
 @keyframes pulsered{from{opacity:1}to{opacity:.4}}
 .hdr-team{background:var(--surface2);border:2px solid var(--accent);border-radius:var(--r);padding:3px 14px;font-family:var(--fd);font-size:var(--fs-hdr);font-weight:900;color:var(--accent);white-space:nowrap}
-.delay-pill{border-radius:var(--r);padding:2px 10px;font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;white-space:nowrap}
+.delay-pill{border-radius:var(--r);padding:2px 14px;font-family:var(--fd);font-size:var(--fs-cd);font-weight:900;white-space:nowrap;line-height:1;letter-spacing:.03em}
 .delay-pill.ontime{background:rgba(46,204,113,.15);border:1px solid rgba(46,204,113,.4);color:#2ecc71}
 .delay-pill.ahead{background:rgba(46,204,113,.15);border:1px solid rgba(46,204,113,.4);color:#2ecc71}
 .delay-pill.minor{background:rgba(255,214,0,.15);border:1px solid rgba(255,214,0,.4);color:var(--yellow)}
@@ -209,14 +205,20 @@ body.custom-has-bg[data-theme="custom"] .tp{
 .hdr-clk{font-family:var(--fm);font-size:var(--fs-hdr);color:var(--text-mid);white-space:nowrap}
 
 /* BODY */
-.body{display:grid;grid-template-columns:1fr 380px;overflow:hidden;min-height:0}
+.body{display:grid;grid-template-columns:1fr 5px 380px;overflow:hidden;min-height:0}
+.drag-handle-v{width:5px;background:var(--border);cursor:col-resize;flex-shrink:0;transition:background .15s;z-index:10;position:relative}
+.drag-handle-v:hover,.drag-handle-v.dragging{background:var(--accent)}
+.drag-handle-h{height:5px;background:var(--border);cursor:row-resize;flex-shrink:0;transition:background .15s;z-index:10}
+.drag-handle-h:hover,.drag-handle-h.dragging{background:var(--accent)}
+[data-theme="tj2"] .drag-handle-v:hover,[data-theme="tj2"] .drag-handle-v.dragging{background:#f5c000}
+[data-theme="tj2"] .drag-handle-h:hover,[data-theme="tj2"] .drag-handle-h.dragging{background:#f5c000}
 .col-l{display:flex;flex-direction:column;border-right:2px solid var(--border);overflow:hidden;min-height:0}
 
 /* TOP ROW: stream + queuing side by side Change width of split here */
-.top-row{height: 65vh;flex-shrink:0;display:grid;grid-template-columns:75% 25%;border-bottom:2px solid var(--border)}
+.top-row{height:65vh;display:grid;grid-template-columns:75% 5px 25%;border-bottom:2px solid var(--border);overflow:hidden;min-height:0;flex-shrink:0}
 
 /* STREAM */
-.stream-half{display:flex;flex-direction:column;border-right:2px solid var(--border);background:#000;overflow:hidden}
+.stream-half{display:flex;flex-direction:column;border-right:2px solid var(--border);background:#000;overflow:hidden;min-height:0}
 .stream-bar{flex-shrink:0;background:var(--surface);border-bottom:2px solid var(--border);padding:5px var(--pad);display:flex;align-items:center;justify-content:space-between;gap:8px}
 .stream-bar-l{display:flex;align-items:center;gap:8px}
 .s-lbl{font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-mid)}
@@ -229,7 +231,7 @@ body.custom-has-bg[data-theme="custom"] .tp{
 .s-nowc{flex:1;display:flex;align-items:center;justify-content:center;font-size:var(--fs-sm);color:var(--text-dim);background:var(--surface);padding:var(--pad);text-align:center}
 
 /* QUEUING */
-.q-half{background:var(--bg);padding:var(--pad);display:flex;flex-direction:column;gap:7px;padding-bottom:calc(var(--pad) + 12px)}
+.q-half{background:var(--bg);padding:var(--pad);display:flex;flex-direction:column;gap:7px;padding-bottom:calc(var(--pad) + 12px);overflow-y:auto;min-height:0}
 .sec-lbl{font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);flex-shrink:0}
 .now-q{font-family:var(--fd);font-size:var(--fs-hero);font-weight:900;color:var(--accent);line-height:.95;letter-spacing:-.01em}
 .not-q{font-family:var(--fd);font-size:var(--fs-big);font-weight:600;color:var(--text-dim)}
@@ -253,7 +255,7 @@ body.custom-has-bg[data-theme="custom"] .tp{
 .panel-m{flex:1;overflow-y:auto;padding:var(--pad);background:var(--bg);min-height:0;scroll-behavior:smooth}
 .panel-m::-webkit-scrollbar{width:4px}
 .panel-m::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-.ml{display:flex;flex-direction:column;gap:4px}
+.ml{display:flex;flex-direction:column;gap:4px;overflow-y:auto;min-height:0;padding:var(--pad)}
 .ml-break{display:flex;align-items:center;gap:8px;padding:5px 10px;color:var(--yellow);font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,214,0,.07);border-radius:4px;border-left:3px solid rgba(255,214,0,.4)}
 [data-theme="tj2"] .ml-break{background:rgba(245,192,0,.1);border-left-color:#f5c000}
 .msh{font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);padding:10px 0 6px;border-bottom:2px solid var(--border);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
@@ -285,10 +287,10 @@ body.custom-has-bg[data-theme="custom"] .tp{
 .tab-btn:hover:not(.act){color:var(--text-mid)}
 .nbadge{display:inline-block;background:var(--red);color:#fff;border-radius:8px;padding:0 5px;font-size:var(--fs-sm);font-weight:700;margin-left:4px;vertical-align:middle;line-height:1.5}
 .alert-icons{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:3px}
-@keyframes alert-pulse-dark{0%,100%{background:rgba(0,212,255,0);color:var(--accent)}50%{background:rgba(0,212,255,.22);color:#ffffff}}
-@keyframes alert-pulse-tj2{0%,100%{background:rgba(245,192,0,0);color:rgba(255,255,255,0.5)}50%{background:rgba(245,192,0,.25);color:#f5c000}}
-.tab-btn.alert-new{animation:alert-pulse-dark 1.4s ease-in-out infinite;border-bottom-color:var(--accent)}
-[data-theme="tj2"] .tab-btn.alert-new{animation:alert-pulse-tj2 1.4s ease-in-out infinite;border-bottom-color:#f5c000}
+@keyframes alert-pulse-dark{0%,100%{background:rgba(0,212,255,0);color:var(--accent);border-bottom-color:transparent;transform:scale(1)}35%{background:rgba(0,212,255,.6);color:#ffffff;border-bottom-color:rgba(0,212,255,1);transform:scale(1.04)}65%{background:rgba(0,212,255,.6);color:#ffffff;border-bottom-color:rgba(0,212,255,1);transform:scale(1.04)}}
+@keyframes alert-pulse-tj2{0%,100%{background:rgba(245,192,0,0);color:rgba(255,255,255,0.5);border-bottom-color:transparent;transform:scale(1)}35%{background:rgba(245,192,0,.65);color:#000000;border-bottom-color:#f5c000;transform:scale(1.04)}65%{background:rgba(245,192,0,.65);color:#000000;border-bottom-color:#f5c000;transform:scale(1.04)}}
+.tab-btn.alert-new{animation:alert-pulse-dark .9s ease-in-out infinite;border-bottom-width:3px}
+[data-theme="tj2"] .tab-btn.alert-new{animation:alert-pulse-tj2 .9s ease-in-out infinite;border-bottom-width:3px}
 .alert-dismiss{background:transparent;border:1px solid var(--border2);border-radius:3px;color:var(--text-dim);font-size:11px;cursor:pointer;padding:1px 6px;margin-left:6px;float:right;font-family:var(--fd);font-weight:700;line-height:1.6}
 .alert-dismiss:hover{border-color:var(--text-mid);color:var(--text)}
 .alert-dismiss-all{background:transparent;border:1px solid var(--border2);border-radius:4px;color:var(--text-dim);font-size:var(--fs-sm);cursor:pointer;padding:2px 10px;font-family:var(--fd);font-weight:700}
@@ -352,6 +354,36 @@ body.custom-has-bg[data-theme="custom"] .tp{
 
 /* FOOTER */
 .footer{height:var(--ftr-h);background:var(--surface);border-top:3px solid var(--border);display:flex;align-items:center;padding:0 var(--pad);gap:20px;overflow:hidden}
+#schedule-overlay{position:fixed;top:var(--hdr-h);left:0;right:0;bottom:0;z-index:7000;background:#09090f;background:var(--bg);display:none;flex-direction:column;overflow:hidden}
+#schedule-overlay.show{display:flex}
+[data-theme="tj2"] #schedule-overlay{background:#0a1628}
+[data-theme="dark"] #schedule-overlay,[data-theme="light"] #schedule-overlay,[data-theme="custom"] #schedule-overlay{background:var(--bg)}
+.sched-hdr{height:var(--hdr-h);background:var(--surface);border-bottom:3px solid var(--border);display:flex;align-items:center;padding:0 var(--pad);gap:16px;flex-shrink:0}
+[data-theme="tj2"] .sched-hdr{background:#0d1e38;border-color:rgba(255,255,255,0.15)}
+.sched-title{font-family:var(--fd);font-size:var(--fs-hdr);font-weight:900;color:var(--accent);letter-spacing:.04em}
+.sched-body{flex:1;overflow-y:auto;padding:var(--pad)}
+.sched-table{width:100%;border-collapse:collapse}
+.sched-table th{font-family:var(--fd);font-size:var(--fs-pit);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);padding:0 10px 10px;text-align:left;border-bottom:2px solid var(--border);white-space:nowrap}
+.sched-table th.right{text-align:right}
+.sched-table td{padding:9px 10px;border-bottom:1px solid rgba(31,34,54,.8);font-family:var(--fd);font-size:var(--fs-pit);vertical-align:middle}
+.sched-table tr.played{opacity:1}
+.sched-table tr.upcoming td{background:rgba(0,212,255,.03)}
+.sched-chip{display:inline-block;font-family:var(--fd);font-size:var(--fs-pit);font-weight:700;padding:2px 7px;border-radius:3px;margin:1px 2px}
+.sched-chip.red{background:rgba(198,40,40,.25);color:#ef9a9a}
+.sched-chip.blue{background:rgba(25,118,210,.25);color:#90caf9}
+.sched-chip.me{background:var(--accent);color:#000;font-weight:900}
+.sched-lbl{font-family:var(--fd);font-size:var(--fs-pit);font-weight:900;color:var(--text);white-space:nowrap}
+.sched-wlt{font-family:var(--fd);font-size:var(--fs-pit);font-weight:900;white-space:nowrap}
+.sched-wlt.w{color:var(--green)}
+.sched-wlt.l{color:var(--red-a)}
+.sched-wlt.t{color:var(--yellow)}
+.sched-rp{font-family:var(--fd);font-size:var(--fs-pit);font-weight:700;color:var(--accent);text-align:right}
+.sched-time{font-family:var(--fd);font-size:var(--fs-pit);font-weight:700;color:var(--text-mid);white-space:nowrap;text-align:right}
+.sched-break{background:rgba(255,214,0,.07);border-left:3px solid rgba(255,214,0,.5)}
+.sched-break td{color:var(--yellow);font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 10px}
+[data-theme="tj2"] .sched-table tr.upcoming td{background:rgba(245,192,0,.04)}
+[data-theme="tj2"] .sched-chip.me{background:#f5c000;color:#000}
+[data-theme="tj2"] .sched-title{color:#f5c000}
 .ftr-stamp{font-family:var(--fm);font-size:var(--fs-sm);color:var(--text-dim);white-space:nowrap}
 .ftr-note{font-family:var(--fd);font-size:var(--fs-sm);color:var(--text-dim);white-space:nowrap;letter-spacing:.06em}
 
@@ -1000,7 +1032,7 @@ body.pit-xl .rt th{ font-size:var(--fs-pit) !important; }
 .played-t{color:var(--text-dim);text-align:center;min-width:28px}
 
 /* EPA OVERLAY */
-#epa-overlay,#alliance-overlay{position:fixed;inset:0;z-index:6000;background:var(--bg);display:none;flex-direction:column}
+#epa-overlay,#alliance-overlay{position:fixed;top:var(--hdr-h);left:0;right:0;bottom:0;z-index:6000;background:var(--bg);display:none;flex-direction:column}
 #epa-overlay.show{display:flex}
 #alliance-overlay.show{display:flex}
 /* Alliance overlay left=blue, right=red column headers */
@@ -1016,8 +1048,8 @@ body.pit-xl .rt th{ font-size:var(--fs-pit) !important; }
 #epa-overlay .epa-hdr,#alliance-overlay .epa-hdr,#pitmap-overlay .epa-hdr{height:var(--hdr-h);background:var(--surface);border-bottom:3px solid var(--border);display:flex;align-items:center;padding:0 var(--pad);gap:16px;flex-shrink:0}
 #epa-overlay .epa-title{font-family:var(--fd);font-size:var(--fs-hdr);font-weight:900;color:var(--text)}
 #epa-overlay .epa-team-num{font-family:var(--fd);font-size:var(--fs-hdr);font-weight:900;color:var(--accent)}
-#epa-overlay .epa-close,#alliance-overlay .epa-close,#pitmap-overlay .epa-close{margin-left:auto;background:var(--surface2);border:2px solid var(--border2);border-radius:var(--r);color:var(--text-dim);font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;padding:4px 14px;cursor:pointer;transition:all .15s}
-#epa-overlay .epa-close:hover,#alliance-overlay .epa-close:hover,#pitmap-overlay .epa-close:hover{color:var(--text);border-color:var(--text-mid)}
+#epa-overlay .epa-close,#alliance-overlay .epa-close,#pitmap-overlay .epa-close,#schedule-overlay .epa-close{margin-left:auto;background:var(--surface2);border:2px solid var(--border2);border-radius:var(--r);color:var(--text-dim);font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;padding:4px 14px;cursor:pointer;transition:all .15s}
+#epa-overlay .epa-close:hover,#alliance-overlay .epa-close:hover,#pitmap-overlay .epa-close:hover,#schedule-overlay .epa-close:hover{color:var(--text);border-color:var(--text-mid)}
 #epa-overlay .epa-body{flex:1;overflow-y:auto;padding:var(--pad);display:flex;flex-direction:column;gap:16px}
 .epa-bar-row{display:grid;grid-template-columns:180px 1fr 60px;align-items:center;gap:12px}
 .epa-bar-label{font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;color:var(--text-mid);text-align:right}
@@ -1033,7 +1065,7 @@ body.pit-xl .rt th{ font-size:var(--fs-pit) !important; }
 /* Header text readable on dark navy */
 [data-theme="tj2"] #epa-overlay .epa-title{color:#ffffff}
 [data-theme="tj2"] #epa-overlay .epa-team-num{color:#7ec8ff}
-[data-theme="tj2"] #epa-overlay .epa-close,[data-theme="tj2"] #alliance-overlay .epa-close,[data-theme="tj2"] #pitmap-overlay .epa-close{background:#1a2f50;border-color:rgba(255,255,255,0.3);color:#ffffff}
+[data-theme="tj2"] #epa-overlay .epa-close,[data-theme="tj2"] #alliance-overlay .epa-close,[data-theme="tj2"] #pitmap-overlay .epa-close,[data-theme="tj2"] #schedule-overlay .epa-close{background:#1a2f50;border-color:rgba(255,255,255,0.3);color:#ffffff}
 [data-theme="tj2"] #epa-overlay .epa-close:hover{background:#243f68;color:#ffffff;border-color:rgba(255,255,255,0.6)}
 /* Body surfaces */
 [data-theme="tj2"] .epa-bar-track{background:rgba(255,255,255,0.1)}
@@ -1057,7 +1089,7 @@ body.pit-xl .rt th{ font-size:var(--fs-pit) !important; }
 [data-theme="tj2"] #epa-overlay .epa-year-lbl{color:rgba(255,255,255,0.4)}
 
 /* PIT MAP OVERLAY */
-#pitmap-overlay{position:fixed;inset:0;z-index:7000;background:var(--bg);display:none;flex-direction:column}
+#pitmap-overlay{position:fixed;top:var(--hdr-h);left:0;right:0;bottom:0;z-index:7000;background:var(--bg);display:none;flex-direction:column}
 #pitmap-overlay.show{display:flex}
 #pitmap-overlay .epa-hdr,#pitmap-overlay .epa-close{font-family:var(--fd)}
 #pitmap-svg-wrap{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:16px;min-height:0;box-sizing:border-box}
@@ -1159,8 +1191,8 @@ body.pit-xl .rt th{ font-size:var(--fs-pit) !important; }
     </div>
   </div>
 
-  <div class="body">
-    <div class="col-l">
+  <div class="body" id="body-row">
+    <div class="col-l" id="col-l">
       <div class="top-row" id="top-row">
 
         <!-- Stream -->
@@ -1178,7 +1210,8 @@ body.pit-xl .rt th{ font-size:var(--fs-pit) !important; }
         </div>
 
         <!-- Queuing -->
-        <div class="q-half">
+        <div class="drag-handle-v" id="drag-v2" title="Drag to resize"></div>
+      <div class="q-half">
           <div class="sec-lbl">Queuing Status</div>
           <div id="q-display"></div>
           <div id="bumper-box" class="bumper-box">&mdash;</div>
@@ -1186,8 +1219,10 @@ body.pit-xl .rt th{ font-size:var(--fs-pit) !important; }
 
       </div>
 
+      <div class="drag-handle-h" id="drag-h" title="Drag to resize; double-click to reset"></div>
+
       <div class="panel-m" id="panel-m">
-        <div style="margin-bottom:7px">
+        <div style="margin-bottom:7px;padding:var(--pad) var(--pad) 0;flex-shrink:0">
           <div class="sec-lbl" id="panel-m-title">Match Schedule</div>
         </div>
         <div class="ml" id="ml"></div>
@@ -1195,6 +1230,7 @@ body.pit-xl .rt th{ font-size:var(--fs-pit) !important; }
       </div>
     </div>
 
+    <div class="drag-handle-v" id="drag-v" title="Drag to resize"></div>
     <div class="sidebar">
       <div class="tab-bar">
         <button class="tab-btn act" onclick="switchTab('rankings',this)">Rankings</button>
@@ -1275,6 +1311,27 @@ body.pit-xl .rt th{ font-size:var(--fs-pit) !important; }
     </div>
   </div>
 
+  <!-- SCHEDULE OVERLAY -->
+  <div id="schedule-overlay">
+    <div class="sched-hdr">
+      <span class="sched-title">📋 Our Schedule</span>
+      <span id="sched-team-lbl" style="font-family:var(--fd);font-size:var(--fs-lbl);font-weight:700;color:var(--text-dim)"></span>
+      <button class="epa-close" onclick="closeSchedule()">✕ Close</button>
+    </div>
+    <div class="sched-body">
+      <table class="sched-table">
+        <thead><tr>
+          <th>Match</th>
+          <th>Blue Alliance</th>
+          <th>Red Alliance</th>
+          <th class="right">Result / Time</th>
+          <th class="right">RP</th>
+        </tr></thead>
+        <tbody id="sched-body"></tbody>
+      </table>
+    </div>
+  </div>
+
   <div class="footer">
     <div class="ftr-note"><span id="version-display" style="color:var(--accent);font-weight:700;margin-right:8px"></span><a id="update-badge" href="https://github.com/mpking828/PitFusion/releases/latest" target="_blank" style="display:none;font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;color:#2ecc71;border:1px solid rgba(46,204,113,.4);background:rgba(46,204,113,.1);border-radius:4px;padding:1px 8px;margin-right:8px;text-decoration:none;cursor:pointer"></a>Nexus refreshes every 15s &middot; TBA refreshes every 30s</div>
     <div style="flex:1"></div>
@@ -1282,6 +1339,7 @@ body.pit-xl .rt th{ font-size:var(--fs-pit) !important; }
     <button class="s-btn" id="font-size-btn" onclick="togglePitFont()" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">🔤 Bigger Text</button>
     <button class="s-btn" id="stream-toggle-btn" onclick="toggleStreamVisibility()" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">📺 Hide Stream</button>
     <button class="s-btn" id="bracket-toggle-btn" onclick="toggleBracket()" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">🏆 Playoff Bracket</button>
+    <button class="s-btn" onclick="openSchedule()" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">📋 Our Schedule</button>
     <div class="ftr-stamp" id="tk-stamp">&mdash;</div>
   </div>
 </div>
@@ -1823,17 +1881,18 @@ function updateScheduleDelay(mx, nowQ){
   const sched=qm.times.scheduledStartTime||qm.times.scheduledQueueTime;
   if(!est||!sched){el.textContent='';el.style.cssText='';return;}
   const delayMin=Math.round((est-sched)/60000);
+  const baseStyle='font-family:var(--fd);font-size:var(--fs-cd);font-weight:900;white-space:nowrap;border-radius:4px;padding:2px 14px;line-height:1;letter-spacing:.03em';
   if(Math.abs(delayMin)<1){
     el.textContent='On time';
-    el.style.cssText='font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;white-space:nowrap;background:rgba(46,204,113,.15);border:1px solid rgba(46,204,113,.4);color:#2ecc71;border-radius:4px;padding:2px 10px';
+    el.style.cssText=baseStyle+';background:rgba(46,204,113,.15);border:1px solid rgba(46,204,113,.4);color:#2ecc71';
     return;
   }
   if(delayMin>0){
     el.textContent=`+${delayMin}m behind`;
-    el.style.cssText=`font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;white-space:nowrap;border-radius:4px;padding:2px 10px;${delayMin>=15?'background:rgba(231,76,60,.18);border:1px solid rgba(231,76,60,.5);color:#ffffff':'background:rgba(255,214,0,.15);border:1px solid rgba(255,214,0,.4);color:var(--yellow)'}`;
+    el.style.cssText=baseStyle+';'+(delayMin>=15?'background:rgba(231,76,60,.18);border:1px solid rgba(231,76,60,.5);color:#ffffff':'background:rgba(255,214,0,.15);border:1px solid rgba(255,214,0,.4);color:var(--yellow)');
   } else {
     el.textContent=`${Math.abs(delayMin)}m ahead`;
-    el.style.cssText='font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;white-space:nowrap;background:rgba(46,204,113,.15);border:1px solid rgba(46,204,113,.4);color:#2ecc71;border-radius:4px;padding:2px 10px';
+    el.style.cssText=baseStyle+';background:rgba(46,204,113,.15);border:1px solid rgba(46,204,113,.4);color:#2ecc71';
   }
 }
 
@@ -1896,19 +1955,19 @@ function rUpcoming(){
   const myT=C.team;
   const SKIP=new Set(['Completed','On field']);
 
-  // Get next 3 non-practice matches for my team that haven't been played
-  const upcoming=mx
-    .filter(m=>!/^practice/i.test(m.label)&&!SKIP.has(m.status)&&[...(m.redTeams||[]),...(m.blueTeams||[])].includes(myT))
-    .slice(0,3);
+  // All non-practice upcoming matches (full list to find breaks between team matches)
+  const allUpcoming=mx.filter(m=>!/^practice/i.test(m.label)&&!SKIP.has(m.status));
+  const myUpcoming=allUpcoming.filter(m=>[...(m.redTeams||[]),...(m.blueTeams||[])].includes(myT)).slice(0,3);
 
-  if(!upcoming.length){el.innerHTML='<div style="color:var(--text-dim);font-size:var(--fs-sm);padding:8px 0">No upcoming matches</div>';return;}
+  if(!myUpcoming.length){el.innerHTML='<div style="color:var(--text-dim);font-size:var(--fs-sm);padding:8px 0">No upcoming matches</div>';return;}
+
+  const mkBreakHtml=b=>{if(!b)return'';const icon=b==='Lunch'?'🍽':b==='End of day'?'🌙':b==='Awards break'?'🏆':b==='Alliance selection'?'🤝':'⏸';return`<div class="up-break">${icon} ${e(b)}</div>`;};
 
   let html='';
-  upcoming.forEach(m=>{
+  myUpcoming.forEach((m,mi)=>{
     const red=m.redTeams||[], blue=m.blueTeams||[];
     const t=m.times?.estimatedQueueTime||m.times?.estimatedStartTime;
     const timeStr=t?new Date(t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
-    // Abbreviate label: "Qualification 13" → "Q13", "Playoff 7" → "P7", "Final 1" → "F1"
     const lbl=m.label.replace(/^Qualification\s+/i,'Q').replace(/^Playoff\s+/i,'P').replace(/^Final\s+/i,'F').replace(/^Qual\s+/i,'Q');
     const mkChip=(t,side)=>`<span class="up-chip ${t===myT?'me':side}">${e(t)}</span>`;
     html+=`<div class="up-row">
@@ -1918,10 +1977,18 @@ function rUpcoming(){
         <div class="up-alliance">${blue.map(t=>mkChip(t,'blue')).join('')}</div>
       </div>
     </div>`;
-    // Break after this match?
-    if(m.breakAfter){
-      const icon=m.breakAfter==='Lunch'?'🍽':m.breakAfter==='End of day'?'🌙':m.breakAfter==='Awards break'?'🏆':m.breakAfter==='Alliance selection'?'🤝':'⏸';
-      html+=`<div class="up-break">${icon} ${e(m.breakAfter)}</div>`;
+    // Find breaks between this match and the next team match
+    // by scanning all upcoming matches between them
+    const nextTeamMatch=myUpcoming[mi+1];
+    if(nextTeamMatch){
+      const mIdx=allUpcoming.indexOf(m);
+      const nIdx=allUpcoming.indexOf(nextTeamMatch);
+      for(let i=mIdx;i<nIdx;i++){
+        if(allUpcoming[i]?.breakAfter) html+=mkBreakHtml(allUpcoming[i].breakAfter);
+      }
+    } else {
+      // Last team match — check if there's a break after it
+      if(m.breakAfter) html+=mkBreakHtml(m.breakAfter);
     }
   });
 
@@ -2062,7 +2129,7 @@ function rAlerts(){
   const annHdr=newAnn.length>0?`<div style="display:flex;justify-content:flex-end;margin-bottom:6px"><button class="alert-dismiss-all" onclick="dismissAllAnn()" title="Dismiss all announcements">Dismiss all</button></div>`:'';;
   document.getElementById('ann-content').innerHTML=ann.length===0
     ?'<div class="empty">No announcements</div>'
-    :annHdr+ann.map(a=>{
+    :annHdr+[...ann].sort((a,b)=>(b.postedTime||0)-(a.postedTime||0)).map(a=>{
         const body=a.body||a.text||a.message||a.content||a.announcement||JSON.stringify(a);
         const t=a.postedTime?ft(new Date(a.postedTime)):(a.time?ft(new Date(a.time)):'');
         const isDismissed=a.id&&dismissed.has(a.id);
@@ -2103,9 +2170,10 @@ function rAlerts(){
   }
 
   const partsHdr=newParts.length>0?`<div style="display:flex;justify-content:flex-end;margin-bottom:6px"><button class="alert-dismiss-all" onclick="dismissAllParts()" title="Dismiss all parts requests">Dismiss all</button></div>`:'';
+  const partsSorted=[...parts].sort((a,b)=>(b.postedTime||0)-(a.postedTime||0));
   document.getElementById('parts-content').innerHTML=parts.length===0
     ?'<div class="empty">No active parts requests</div>'
-    :partsHdr+parts.map(p=>{
+    :partsHdr+partsSorted.map(p=>{
         const team=p.requestedByTeam||p.teamNumber||p.team||p.teamNum||'?';
         const body=p.parts||p.request||p.body||p.text||p.message||p.content||p.part||p.item||JSON.stringify(p);
         const t=p.postedTime?ft(new Date(p.postedTime)):(p.time?ft(new Date(p.time)):'');
@@ -3142,6 +3210,76 @@ async function openAllianceEpa(blueTeams, redTeams, matchLabel){
   body.innerHTML = `<div>${leftHtml}</div><div>${rightHtml}</div>`;
 }
 
+function openSchedule(){
+  const myT=C.team;
+  document.getElementById('sched-team-lbl').textContent='Team #'+myT;
+  const sm=scoreMap();
+  const nxMx=(nxData?.matches||[]).filter(m=>!/^practice/i.test(m.label));
+  // All my matches from Nexus
+  const myMx=nxMx.filter(m=>[...(m.redTeams||[]),...(m.blueTeams||[])].includes(myT));
+  const SKIP=new Set(['Completed','On field']);
+  // Build RP map from TBA
+  const rpMap={};
+  (tbaMx||[]).filter(m=>m.comp_level==='qm'&&m.score_breakdown).forEach(m=>{
+    const key=`qual_${m.match_number}`;
+    const rp={red:m.score_breakdown.red?.rp??null,blue:m.score_breakdown.blue?.rp??null};
+    if(rp.red!=null||rp.blue!=null) rpMap[key]=rp;
+  });
+
+  let rows='';
+  myMx.forEach(m=>{
+    const isDone=!SKIP.has(m.status);
+    const sc=sm[nl(m.label)];
+    const isPlayed=!!sc||(m.status==='Completed');
+    const red=m.redTeams||[], blue=m.blueTeams||[];
+    const iAmRed=red.includes(myT);
+    const mkChip=(t,side)=>`<span class="sched-chip ${t===myT?'me':side}">${e(t)}</span>`;
+    const blueChips=blue.map(t=>mkChip(t,'blue')).join('');
+    const redChips=red.map(t=>mkChip(t,'red')).join('');
+
+    let resultCell='', rpCell='';
+    if(isPlayed&&sc){
+      const myScore=iAmRed?sc.red:sc.blue, oppScore=iAmRed?sc.blue:sc.red;
+      const wlt=myScore>oppScore?'W':myScore<oppScore?'L':'T';
+      const wltCls=wlt==='W'?'w':wlt==='L'?'l':'t';
+      resultCell=`<span class="sched-wlt ${wltCls}">${wlt} ${myScore}&ndash;${oppScore}</span>`;
+      const rpKey=nl(m.label);
+      const rp=rpMap[rpKey];
+      if(rp) rpCell=(iAmRed?rp.red:rp.blue)??'&mdash;';
+    } else {
+      // Upcoming — show time
+      const t=m.times?.estimatedQueueTime||m.times?.estimatedStartTime;
+      resultCell=t?`<span class="sched-time">${ft(new Date(t))}</span>`:'<span class="sched-time">&mdash;</span>';
+    }
+
+    const rowCls=isPlayed?'played':'upcoming';
+    rows+=`<tr class="${rowCls}">
+      <td class="sched-lbl">${e(m.label.replace(/^Qualification\s+/i,'Qual '))}</td>
+      <td style="min-width:0"><div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px">${blueChips}</div></td>
+      <td style="min-width:0"><div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px">${redChips}</div></td>
+      <td style="text-align:right">${resultCell}</td>
+      <td class="sched-rp">${rpCell||'&mdash;'}</td>
+    </tr>`;
+
+    // Find breaks between this match and the next — scan all non-practice matches
+    const nextM=myMx[myMx.indexOf(m)+1];
+    const mIdxAll=nxMx.indexOf(m);
+    const nIdxAll=nextM?nxMx.indexOf(nextM):nxMx.length;
+    for(let i=mIdxAll;i<nIdxAll;i++){
+      const bk=nxMx[i]?.breakAfter;
+      if(bk){const icon=bk==='Lunch'?'🍽':bk==='End of day'?'🌙':bk==='Awards break'?'🏆':bk==='Alliance selection'?'🤝':'⏸';rows+=`<tr class="sched-break"><td colspan="5">${icon} ${e(bk)}</td></tr>`;}
+    }
+  });
+
+  if(!rows) rows=`<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:20px">No matches scheduled</td></tr>`;
+  document.getElementById('sched-body').innerHTML=rows;
+  document.getElementById('schedule-overlay').classList.add('show');
+}
+
+function closeSchedule(){
+  document.getElementById('schedule-overlay').classList.remove('show');
+}
+
 function closeAllianceEpa(){
   hideEpaTip();
   document.getElementById('alliance-overlay').classList.remove('show');
@@ -3687,6 +3825,91 @@ async function checkForUpdate(){
     // Network error or rate limited — silently ignore
   }
 }
+
+// ── RESIZABLE PANELS ────────────────────────────────────────────────────────
+(function(){
+  const LS = 'pitfusion_layout_sizes';
+  const DEFAULTS = { sidebarW: 380, topRowH: 65, streamW: 75 };
+  let sizes = DEFAULTS;
+  try { const s=JSON.parse(localStorage.getItem(LS)||'{}'); sizes={...DEFAULTS,...s}; } catch{}
+
+  function applyLayout(){
+    const body=document.getElementById('body-row');
+    const topRow=document.getElementById('top-row');
+    if(body) body.style.gridTemplateColumns=`1fr 5px ${sizes.sidebarW}px`;
+    if(topRow){
+      topRow.style.gridTemplateColumns=`${sizes.streamW}% 5px ${100-sizes.streamW}%`;
+      topRow.style.height=`${sizes.topRowH}vh`;
+    }
+  }
+
+  function saveLayout(){ try{ localStorage.setItem(LS, JSON.stringify(sizes)); }catch{} }
+
+  function makeDrag(handleId, onDrag){
+    const el=document.getElementById(handleId);
+    if(!el) return;
+    let startX, startY, startVal;
+    const down=e=>{
+      e.preventDefault();
+      el.classList.add('dragging');
+      startX=e.touches?e.touches[0].clientX:e.clientX;
+      startY=e.touches?e.touches[0].clientY:e.clientY;
+      startVal=onDrag.getVal();
+      document.addEventListener('mousemove', move); document.addEventListener('touchmove', move, {passive:false});
+      document.addEventListener('mouseup', up); document.addEventListener('touchend', up);
+    };
+    const move=e=>{
+      e.preventDefault();
+      const x=e.touches?e.touches[0].clientX:e.clientX;
+      const y=e.touches?e.touches[0].clientY:e.clientY;
+      onDrag.drag(x-startX, y-startY, startVal);
+      applyLayout();
+    };
+    const up=()=>{
+      el.classList.remove('dragging');
+      document.removeEventListener('mousemove',move); document.removeEventListener('touchmove',move);
+      document.removeEventListener('mouseup',up); document.removeEventListener('touchend',up);
+      saveLayout();
+    };
+    el.addEventListener('mousedown',down); el.addEventListener('touchstart',down,{passive:false});
+  }
+
+  // Vertical: sidebar width
+  makeDrag('drag-v',{
+    getVal:()=>sizes.sidebarW,
+    drag:(dx,dy,start)=>{ sizes.sidebarW=Math.max(260,Math.min(600,start-dx)); }
+  });
+
+  // Vertical: stream vs q-half width
+  makeDrag('drag-v2',{
+    getVal:()=>sizes.streamW,
+    drag:(dx,dy,start)=>{
+      const totalW=document.getElementById('top-row')?.clientWidth||1000;
+      sizes.streamW=Math.max(40,Math.min(85,start+(dx/totalW)*100));
+    }
+  });
+
+  // Horizontal: top-row vs match list height
+  makeDrag('drag-h',{
+    getVal:()=>sizes.topRowH,
+    drag:(dx,dy,start)=>{
+      const newVh=start+(dy/window.innerHeight*100);
+      sizes.topRowH=Math.max(20,Math.min(80,newVh));
+    }
+  });
+
+  // Double-click to reset
+  ['drag-v','drag-v2','drag-h'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.addEventListener('dblclick',()=>{
+      sizes={...DEFAULTS};
+      applyLayout(); saveLayout();
+    });
+  });
+
+  // Apply on load
+  applyLayout();
+})();
 </script>
 </body>
 </html>
