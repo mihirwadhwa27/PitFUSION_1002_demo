@@ -1531,16 +1531,31 @@ body.grid-edit .gw:not(.gw-dragging):hover{border-color:var(--accent);box-shadow
     </div>
   </div>
 
-  <div class="footer">
-    <div class="ftr-note"><span id="version-display" style="color:var(--accent);font-weight:700;margin-right:8px"></span><a id="update-badge" href="https://github.com/mpking828/PitFusion/releases/latest" target="_blank" style="display:none;font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;color:#2ecc71;border:1px solid rgba(46,204,113,.4);background:rgba(46,204,113,.1);border-radius:4px;padding:1px 8px;margin-right:8px;text-decoration:none;cursor:pointer"></a>Nexus refreshes every 15s &middot; TBA refreshes every 30s</div>
-    <div style="flex:1"></div>
-    <button class="s-btn" id="epa-btn" onclick="openEpa(C.team)" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">📈 EPA Stats</button>
-    <button class="s-btn" id="font-size-btn" onclick="togglePitFont()" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">🔤 Bigger Text</button>
-    <button class="s-btn" id="stream-toggle-btn" onclick="toggleStreamVisibility()" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">📺 Hide Stream</button>
-    <button class="s-btn" id="bracket-toggle-btn" onclick="toggleBracket()" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">🏆 Playoff Bracket</button>
-    <button class="s-btn" onclick="openSchedule()" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">📋 Our Schedule</button>
-    <div class="ftr-stamp" id="tk-stamp">&mdash;</div>
-  </div>
+     <div class="footer" id="main-footer">
+       <div id="layout-toolbar">
+         <!-- Lock/Edit button -->
+         <button class="layout-btn lock-btn" id="layout-lock-btn" onclick="gwToggleLock()">🔓 Edit Layout</button>
+         <!-- Presets -->
+         <button class="layout-btn preset-btn" id="preset-quals" onclick="gwLoadPreset('quals')">⚡ Quals</button>
+         <button class="layout-btn preset-btn" id="preset-playoffs" onclick="gwLoadPreset('playoffs')">🏆 Playoffs</button>
+         <button class="layout-btn preset-btn" id="preset-pit" onclick="gwLoadPreset('pit')">🔧 Pit Mode</button>
+         <!-- Widget toggle (edit mode only) -->
+         <button class="layout-btn" id="layout-widgets-btn" onclick="gwToggleWidgetPanel()" style="display:none">👁 Widgets</button>
+         <!-- Grid config (edit mode only) -->
+         <button class="layout-btn" id="layout-cfg-btn" onclick="gwToggleCfgPanel()" style="display:none">⚙ Grid</button>
+         <!-- Divider -->
+         <div style="width:2px;height:20px;background:var(--border2);flex-shrink:0;margin:0 2px"></div>
+         <!-- Original footer content -->
+         <div class="ftr-note"><span id="version-display" style="color:var(--accent);font-weight:700;margin-right:8px"></span><a id="update-badge" href="https://github.com/mpking828/PitFusion/releases/latest" target="_blank" style="display:none;font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;color:#2ecc71;border:1px solid rgba(46,204,113,.4);background:rgba(46,204,113,.1);border-radius:4px;padding:1px 8px;margin-right:8px;text-decoration:none;cursor:pointer"></a>Nexus refreshes every 15s · TBA refreshes every 30s</div>
+         <div style="flex:1"></div>
+         <button class="s-btn" id="epa-btn" onclick="openEpa(C.team)" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">📈 EPA Stats</button>
+         <button class="s-btn" id="font-size-btn" onclick="togglePitFont()" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">🔤 Bigger Text</button>
+         <button class="s-btn" id="stream-toggle-btn" onclick="toggleStreamVisibility()" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">📺 Hide Stream</button>
+         <button class="s-btn" id="bracket-toggle-btn" onclick="toggleBracket()" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">🏆 Playoff Bracket</button>
+         <button class="s-btn" onclick="openSchedule()" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">📋 Our Schedule</button>
+         <div class="ftr-stamp" id="tk-stamp">—</div>
+       </div>
+     </div>
 </div>
 
 <script>
