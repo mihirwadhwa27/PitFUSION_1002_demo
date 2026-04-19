@@ -4124,6 +4124,648 @@ async function checkForUpdate(){
   // Apply on load
   applyLayout();
 })();
+<div class="footer" id="main-footer">
+  <div id="layout-toolbar">
+    <!-- Lock/Edit button -->
+    <button class="layout-btn lock-btn" id="layout-lock-btn" onclick="gwToggleLock()">🔓 Edit Layout</button>
+    <!-- Presets -->
+    <button class="layout-btn preset-btn" id="preset-quals" onclick="gwLoadPreset('quals')">⚡ Quals</button>
+    <button class="layout-btn preset-btn" id="preset-playoffs" onclick="gwLoadPreset('playoffs')">🏆 Playoffs</button>
+    <button class="layout-btn preset-btn" id="preset-pit" onclick="gwLoadPreset('pit')">🔧 Pit Mode</button>
+    <!-- Widget toggle (edit mode only) -->
+    <button class="layout-btn" id="layout-widgets-btn" onclick="gwToggleWidgetPanel()" style="display:none">👁 Widgets</button>
+    <!-- Grid config (edit mode only) -->
+    <button class="layout-btn" id="layout-cfg-btn" onclick="gwToggleCfgPanel()" style="display:none">⚙ Grid</button>
+    <!-- Divider -->
+    <div style="width:2px;height:20px;background:var(--border2);flex-shrink:0;margin:0 2px"></div>
+    <!-- Original footer content -->
+    <div class="ftr-note"><span id="version-display" style="color:var(--accent);font-weight:700;margin-right:8px"></span><a id="update-badge" href="https://github.com/mpking828/PitFusion/releases/latest" target="_blank" style="display:none;font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;color:#2ecc71;border:1px solid rgba(46,204,113,.4);background:rgba(46,204,113,.1);border-radius:4px;padding:1px 8px;margin-right:8px;text-decoration:none;cursor:pointer"></a>Nexus refreshes every 15s · TBA refreshes every 30s</div>
+    <div style="flex:1"></div>
+    <button class="s-btn" id="epa-btn" onclick="openEpa(C.team)" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">📈 EPA Stats</button>
+    <button class="s-btn" id="font-size-btn" onclick="togglePitFont()" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">🔤 Bigger Text</button>
+    <button class="s-btn" id="stream-toggle-btn" onclick="toggleStreamVisibility()" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">📺 Hide Stream</button>
+    <button class="s-btn" id="bracket-toggle-btn" onclick="toggleBracket()" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">🏆 Playoff Bracket</button>
+    <button class="s-btn" onclick="openSchedule()" style="font-size:var(--fs-lbl);padding:5px 16px;font-family:var(--fd);font-weight:700;letter-spacing:.06em">📋 Our Schedule</button>
+    <div class="ftr-stamp" id="tk-stamp">—</div>
+  </div>
+</div>
+ 
+ 
+<!-- ============================================================
+     BLOCK D — paste before the final </script> tag
+     ============================================================ -->
+<script id="BLOCK_D_PASTE_BEFORE_LAST_SCRIPT_CLOSE">
+// ============================================================
+// PITFUSION GRID LAYOUT SYSTEM
+// ============================================================
+ 
+const GW_LS_LAYOUT  = 'pitfusion_gw_layout';
+const GW_LS_CFG     = 'pitfusion_gw_cfg';
+const GW_LS_VISIBLE = 'pitfusion_gw_visible';
+const GW_LS_LOCKED  = 'pitfusion_gw_locked';
+const GW_LS_MODE    = 'pitfusion_gw_mode'; // 'grid' or 'classic'
+ 
+// Widget definitions
+const GW_WIDGETS = [
+  { id:'stream',   label:'Stream',         icon:'📺' },
+  { id:'queuing',  label:'Queuing',        icon:'⚡' },
+  { id:'schedule', label:'Match Schedule', icon:'📋' },
+  { id:'rankings', label:'Rankings',       icon:'🏅' },
+  { id:'team',     label:'My Team',        icon:'🤖' },
+  { id:'alerts',   label:'Alerts',         icon:'🔔' },
+  { id:'upcoming', label:'Upcoming',       icon:'🔜' },
+  { id:'bumper',   label:'Bumper Color',   icon:'🎨' },
+];
+ 
+// Grid config
+let gwCfg = { cols: 12, rows: 20 };
+try { Object.assign(gwCfg, JSON.parse(localStorage.getItem(GW_LS_CFG)||'{}')); } catch{}
+ 
+// Widget visibility
+const GW_DEFAULT_VISIBLE = { stream:true, queuing:true, schedule:true, rankings:true, team:true, alerts:true, upcoming:true, bumper:true };
+let gwVisible = {...GW_DEFAULT_VISIBLE};
+try { Object.assign(gwVisible, JSON.parse(localStorage.getItem(GW_LS_VISIBLE)||'{}')); } catch{}
+ 
+// Layout locked state
+let gwLocked = localStorage.getItem(GW_LS_LOCKED) === '1';
+ 
+// Grid mode active
+let gwModeActive = localStorage.getItem(GW_LS_MODE) === '1';
+ 
+// Presets — defined as fractional positions (0..1) so they scale to any resolution
+// Each widget: { x, y, w, h } in grid cells
+const GW_PRESETS = {
+  quals: {
+    stream:   { cx:0,    cy:0,    cw:7, ch:11 },
+    queuing:  { cx:7,    cy:0,    cw:5, ch:11 },
+    schedule: { cx:0,    cy:11,   cw:7, ch:9  },
+    rankings: { cx:7,    cy:11,   cw:5, ch:9  },
+    team:     { cx:0,    cy:0,    cw:0, ch:0  }, // hidden
+    alerts:   { cx:0,    cy:0,    cw:0, ch:0  }, // hidden
+    upcoming: { cx:0,    cy:0,    cw:0, ch:0  }, // hidden
+    bumper:   { cx:7,    cy:11,   cw:5, ch:4  }, // overlaps rankings bottom — placed below
+  },
+  playoffs: {
+    stream:   { cx:0,    cy:0,    cw:5, ch:8  },
+    queuing:  { cx:5,    cy:0,    cw:4, ch:8  },
+    schedule: { cx:0,    cy:8,    cw:9, ch:12 },
+    rankings: { cx:9,    cy:0,    cw:3, ch:10 },
+    team:     { cx:0,    cy:0,    cw:0, ch:0  },
+    alerts:   { cx:9,    cy:10,   cw:3, ch:10 },
+    upcoming: { cx:0,    cy:0,    cw:0, ch:0  },
+    bumper:   { cx:5,    cy:8,    cw:4, ch:4  },
+  },
+  pit: {
+    stream:   { cx:0,    cy:0,    cw:0, ch:0  }, // hidden
+    queuing:  { cx:0,    cy:0,    cw:5, ch:10 },
+    schedule: { cx:5,    cy:0,    cw:7, ch:20 },
+    rankings: { cx:0,    cy:10,   cw:5, ch:10 },
+    team:     { cx:0,    cy:0,    cw:0, ch:0  },
+    alerts:   { cx:0,    cy:0,    cw:0, ch:0  },
+    upcoming: { cx:0,    cy:0,    cw:0, ch:0  },
+    bumper:   { cx:0,    cy:0,    cw:0, ch:0  },
+  },
+};
+ 
+// Current layout: { widgetId: { cx, cy, cw, ch } } (cell coordinates)
+let gwLayout = {};
+try { gwLayout = JSON.parse(localStorage.getItem(GW_LS_LAYOUT)||'{}'); } catch{}
+ 
+// ── CELL SIZE ────────────────────────────────────────────────────────────────
+function gwCellW(){ return document.getElementById('grid-canvas').clientWidth  / gwCfg.cols; }
+function gwCellH(){ return document.getElementById('grid-canvas').clientHeight / gwCfg.rows; }
+ 
+// ── APPLY LAYOUT ─────────────────────────────────────────────────────────────
+function gwApplyLayout(){
+  const cw = gwCellW(), ch = gwCellH();
+  GW_WIDGETS.forEach(({id})=>{
+    const el = document.getElementById('gw-'+id);
+    if(!el) return;
+    const pos = gwLayout[id];
+    const vis = gwVisible[id];
+ 
+    if(!vis || !pos || pos.cw === 0 || pos.ch === 0){
+      el.classList.add('gw-hidden');
+      return;
+    }
+    el.classList.remove('gw-hidden');
+    el.style.left   = (pos.cx * cw) + 'px';
+    el.style.top    = (pos.cy * ch) + 'px';
+    el.style.width  = (pos.cw * cw) + 'px';
+    el.style.height = (pos.ch * ch) + 'px';
+  });
+  gwDrawGrid();
+}
+ 
+// ── DRAW GRID OVERLAY ────────────────────────────────────────────────────────
+function gwDrawGrid(){
+  const canvas = document.getElementById('grid-overlay');
+  if(!canvas) return;
+  const el = document.getElementById('grid-canvas');
+  const W = el.clientWidth, H = el.clientHeight;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  if(!document.body.classList.contains('grid-edit')) return;
+ 
+  const cw = W / gwCfg.cols, ch = H / gwCfg.rows;
+  ctx.strokeStyle = 'rgba(0,212,255,0.08)';
+  ctx.lineWidth = 1;
+  for(let c=0; c<=gwCfg.cols; c++){
+    ctx.beginPath(); ctx.moveTo(c*cw,0); ctx.lineTo(c*cw,H); ctx.stroke();
+  }
+  for(let r=0; r<=gwCfg.rows; r++){
+    ctx.beginPath(); ctx.moveTo(0,r*ch); ctx.lineTo(W,r*ch); ctx.stroke();
+  }
+}
+ 
+// ── DRAG & RESIZE ────────────────────────────────────────────────────────────
+let gwDrag = null; // { id, startMouseX, startMouseY, startCX, startCY, origW, origH }
+let gwResize = null;
+ 
+function gwStartDrag(e, id){
+  if(gwLocked) return;
+  if(!document.body.classList.contains('grid-edit')) return;
+  e.preventDefault();
+  const el = document.getElementById('gw-'+id);
+  const rect = el.getBoundingClientRect();
+  const mx = e.touches ? e.touches[0].clientX : e.clientX;
+  const my = e.touches ? e.touches[0].clientY : e.clientY;
+  const pos = gwLayout[id] || {cx:0,cy:0,cw:4,ch:5};
+  gwDrag = { id, startMX:mx, startMY:my, startCX:pos.cx, startCY:pos.cy, cw:pos.cw, ch:pos.ch };
+  el.classList.add('gw-dragging');
+  document.getElementById('grid-drop-preview').style.display='block';
+  document.addEventListener('mousemove', gwOnDragMove);
+  document.addEventListener('touchmove', gwOnDragMove, {passive:false});
+  document.addEventListener('mouseup', gwOnDragEnd);
+  document.addEventListener('touchend', gwOnDragEnd);
+}
+ 
+function gwOnDragMove(e){
+  if(!gwDrag) return;
+  e.preventDefault();
+  const mx = e.touches ? e.touches[0].clientX : e.clientX;
+  const my = e.touches ? e.touches[0].clientY : e.clientY;
+  const cw = gwCellW(), ch = gwCellH();
+  const dcx = Math.round((mx - gwDrag.startMX) / cw);
+  const dcy = Math.round((my - gwDrag.startMY) / ch);
+  const newCX = Math.max(0, Math.min(gwCfg.cols - gwDrag.cw, gwDrag.startCX + dcx));
+  const newCY = Math.max(0, Math.min(gwCfg.rows - gwDrag.ch, gwDrag.startCY + dcy));
+  const preview = document.getElementById('grid-drop-preview');
+  preview.style.left   = (newCX * cw) + 'px';
+  preview.style.top    = (newCY * ch) + 'px';
+  preview.style.width  = (gwDrag.cw * cw - 4) + 'px';
+  preview.style.height = (gwDrag.ch * ch - 4) + 'px';
+  const valid = !gwCheckCollision(gwDrag.id, newCX, newCY, gwDrag.cw, gwDrag.ch);
+  preview.classList.toggle('invalid', !valid);
+  // Move widget visually while dragging
+  const el = document.getElementById('gw-'+gwDrag.id);
+  if(el){ el.style.left=(newCX*cw)+'px'; el.style.top=(newCY*ch)+'px'; }
+}
+ 
+function gwOnDragEnd(e){
+  if(!gwDrag) return;
+  const mx = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+  const my = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+  const cw = gwCellW(), ch = gwCellH();
+  const dcx = Math.round((mx - gwDrag.startMX) / cw);
+  const dcy = Math.round((my - gwDrag.startMY) / ch);
+  const newCX = Math.max(0, Math.min(gwCfg.cols - gwDrag.cw, gwDrag.startCX + dcx));
+  const newCY = Math.max(0, Math.min(gwCfg.rows - gwDrag.ch, gwDrag.startCY + dcy));
+  const valid = !gwCheckCollision(gwDrag.id, newCX, newCY, gwDrag.cw, gwDrag.ch);
+  if(valid){
+    gwLayout[gwDrag.id] = { cx:newCX, cy:newCY, cw:gwDrag.cw, ch:gwDrag.ch };
+  }
+  document.getElementById('grid-drop-preview').style.display='none';
+  const el = document.getElementById('gw-'+gwDrag.id);
+  if(el) el.classList.remove('gw-dragging');
+  gwDrag = null;
+  gwApplyLayout();
+  gwSaveLayout();
+  document.removeEventListener('mousemove', gwOnDragMove);
+  document.removeEventListener('touchmove', gwOnDragMove);
+  document.removeEventListener('mouseup', gwOnDragEnd);
+  document.removeEventListener('touchend', gwOnDragEnd);
+}
+ 
+// Resize
+function gwStartResize(e, id){
+  if(gwLocked) return;
+  if(!document.body.classList.contains('grid-edit')) return;
+  e.preventDefault(); e.stopPropagation();
+  const mx = e.touches ? e.touches[0].clientX : e.clientX;
+  const my = e.touches ? e.touches[0].clientY : e.clientY;
+  const pos = gwLayout[id] || {cx:0,cy:0,cw:4,ch:5};
+  gwResize = { id, startMX:mx, startMY:my, startCW:pos.cw, startCH:pos.ch, cx:pos.cx, cy:pos.cy };
+  document.addEventListener('mousemove', gwOnResizeMove);
+  document.addEventListener('touchmove', gwOnResizeMove, {passive:false});
+  document.addEventListener('mouseup', gwOnResizeEnd);
+  document.addEventListener('touchend', gwOnResizeEnd);
+}
+ 
+function gwOnResizeMove(e){
+  if(!gwResize) return;
+  e.preventDefault();
+  const mx = e.touches ? e.touches[0].clientX : e.clientX;
+  const my = e.touches ? e.touches[0].clientY : e.clientY;
+  const cw = gwCellW(), ch = gwCellH();
+  const dcx = Math.round((mx - gwResize.startMX) / cw);
+  const dcy = Math.round((my - gwResize.startMY) / ch);
+  const newCW = Math.max(2, Math.min(gwCfg.cols - gwResize.cx, gwResize.startCW + dcx));
+  const newCH = Math.max(2, Math.min(gwCfg.rows - gwResize.cy, gwResize.startCH + dcy));
+  const el = document.getElementById('gw-'+gwResize.id);
+  if(el){ el.style.width=(newCW*cw)+'px'; el.style.height=(newCH*ch)+'px'; }
+}
+ 
+function gwOnResizeEnd(e){
+  if(!gwResize) return;
+  const mx = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+  const my = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+  const cw = gwCellW(), ch = gwCellH();
+  const dcx = Math.round((mx - gwResize.startMX) / cw);
+  const dcy = Math.round((my - gwResize.startMY) / ch);
+  const newCW = Math.max(2, Math.min(gwCfg.cols - gwResize.cx, gwResize.startCW + dcx));
+  const newCH = Math.max(2, Math.min(gwCfg.rows - gwResize.cy, gwResize.startCH + dcy));
+  const valid = !gwCheckCollision(gwResize.id, gwResize.cx, gwResize.cy, newCW, newCH);
+  if(valid){
+    gwLayout[gwResize.id] = { ...gwLayout[gwResize.id], cw:newCW, ch:newCH };
+  }
+  gwResize = null;
+  gwApplyLayout();
+  gwSaveLayout();
+  document.removeEventListener('mousemove', gwOnResizeMove);
+  document.removeEventListener('touchmove', gwOnResizeMove);
+  document.removeEventListener('mouseup', gwOnResizeEnd);
+  document.removeEventListener('touchend', gwOnResizeEnd);
+}
+ 
+// ── COLLISION DETECTION ───────────────────────────────────────────────────────
+function gwCheckCollision(movingId, cx, cy, cw, ch){
+  for(const {id} of GW_WIDGETS){
+    if(id === movingId) continue;
+    const pos = gwLayout[id];
+    if(!pos || !gwVisible[id] || pos.cw===0 || pos.ch===0) continue;
+    // AABB overlap
+    if(cx < pos.cx+pos.cw && cx+cw > pos.cx && cy < pos.cy+pos.ch && cy+ch > pos.cy) return true;
+  }
+  return false;
+}
+ 
+// ── LOCK / EDIT ───────────────────────────────────────────────────────────────
+function gwToggleLock(){
+  gwLocked = !gwLocked;
+  localStorage.setItem(GW_LS_LOCKED, gwLocked ? '1' : '0');
+  gwApplyEditUI();
+}
+ 
+function gwApplyEditUI(){
+  const editMode = !gwLocked;
+  document.body.classList.toggle('grid-edit', editMode);
+  const btn = document.getElementById('layout-lock-btn');
+  if(btn){
+    btn.textContent = gwLocked ? '🔒 Locked' : '🔓 Edit Layout';
+    btn.classList.toggle('locked', gwLocked);
+  }
+  const wBtn = document.getElementById('layout-widgets-btn');
+  const cBtn = document.getElementById('layout-cfg-btn');
+  if(wBtn) wBtn.style.display = editMode ? '' : 'none';
+  if(cBtn) cBtn.style.display = editMode ? '' : 'none';
+  // Close panels when locking
+  if(gwLocked){
+    document.getElementById('widget-panel').classList.remove('show');
+    document.getElementById('grid-cfg').classList.remove('show');
+  }
+  gwDrawGrid();
+}
+ 
+// ── PRESETS ───────────────────────────────────────────────────────────────────
+function gwLoadPreset(name){
+  const preset = GW_PRESETS[name];
+  if(!preset) return;
+ 
+  // Reset visibility
+  gwVisible = {...GW_DEFAULT_VISIBLE};
+ 
+  // Apply preset positions and visibility
+  GW_WIDGETS.forEach(({id})=>{
+    const p = preset[id];
+    if(!p){ gwLayout[id] = {cx:0,cy:0,cw:4,ch:5}; return; }
+    gwLayout[id] = { cx:p.cx, cy:p.cy, cw:p.cw, ch:p.ch };
+    gwVisible[id] = (p.cw > 0 && p.ch > 0);
+  });
+ 
+  // Fix Quals preset — bumper should go below rankings
+  if(name === 'quals'){
+    gwVisible.team    = false;
+    gwVisible.alerts  = false;
+    gwVisible.upcoming = false;
+    gwLayout.bumper   = { cx:7, cy:15, cw:5, ch:5 };
+  }
+  if(name === 'playoffs'){
+    gwVisible.team    = false;
+    gwVisible.upcoming = false;
+  }
+  if(name === 'pit'){
+    gwVisible.stream  = false;
+    gwVisible.team    = false;
+    gwVisible.alerts  = false;
+    gwVisible.upcoming = false;
+    gwVisible.bumper  = false;
+  }
+ 
+  gwSaveLayout();
+  gwApplyLayout();
+  gwBuildWidgetPanel();
+  gwSyncAll();
+ 
+  // Highlight active preset
+  ['quals','playoffs','pit'].forEach(p=>{
+    const btn = document.getElementById('preset-'+p);
+    if(btn) btn.classList.toggle('lbact', p===name);
+  });
+}
+ 
+// ── WIDGET VISIBILITY ─────────────────────────────────────────────────────────
+function gwHide(id){
+  gwVisible[id] = false;
+  gwSaveLayout();
+  gwApplyLayout();
+  gwBuildWidgetPanel();
+}
+ 
+function gwToggleVisible(id){
+  gwVisible[id] = !gwVisible[id];
+  // If showing and no valid layout position, place at origin
+  if(gwVisible[id]){
+    const pos = gwLayout[id];
+    if(!pos || pos.cw===0 || pos.ch===0){
+      gwLayout[id] = { cx:0, cy:0, cw:4, ch:5 };
+    }
+  }
+  gwSaveLayout();
+  gwApplyLayout();
+  gwBuildWidgetPanel();
+}
+ 
+function gwBuildWidgetPanel(){
+  const panel = document.getElementById('widget-panel');
+  if(!panel) return;
+  let html = '<div class="wp-title">Widgets</div>';
+  GW_WIDGETS.forEach(({id,label,icon})=>{
+    const on = gwVisible[id];
+    html += `<div class="wp-row" onclick="gwToggleVisible('${id}')">
+      <div class="wp-check${on?' on':''}"></div>
+      <span class="wp-label">${icon} ${label}</span>
+    </div>`;
+  });
+  panel.innerHTML = html;
+}
+ 
+function gwToggleWidgetPanel(){
+  const panel = document.getElementById('widget-panel');
+  gwBuildWidgetPanel();
+  panel.classList.toggle('show');
+}
+ 
+// ── GRID CONFIG ───────────────────────────────────────────────────────────────
+function gwUpdateCfg(){
+  const cols = parseInt(document.getElementById('cfg-cols').value);
+  const rows = parseInt(document.getElementById('cfg-rows').value);
+  document.getElementById('cfg-cols-val').textContent = cols;
+  document.getElementById('cfg-rows-val').textContent = rows;
+  gwCfg = { cols, rows };
+  localStorage.setItem(GW_LS_CFG, JSON.stringify(gwCfg));
+  gwApplyLayout();
+}
+ 
+function gwToggleCfgPanel(){
+  const panel = document.getElementById('grid-cfg');
+  panel.classList.toggle('show');
+  document.getElementById('cfg-cols').value = gwCfg.cols;
+  document.getElementById('cfg-rows').value = gwCfg.rows;
+  document.getElementById('cfg-cols-val').textContent = gwCfg.cols;
+  document.getElementById('cfg-rows-val').textContent = gwCfg.rows;
+}
+ 
+// ── SAVE ──────────────────────────────────────────────────────────────────────
+function gwSaveLayout(){
+  try{
+    localStorage.setItem(GW_LS_LAYOUT,  JSON.stringify(gwLayout));
+    localStorage.setItem(GW_LS_VISIBLE, JSON.stringify(gwVisible));
+  }catch{}
+}
+ 
+// ── GRID MODE TOGGLE (classic ↔ grid) ─────────────────────────────────────────
+function toggleGridMode(){
+  gwModeActive = !gwModeActive;
+  localStorage.setItem(GW_LS_MODE, gwModeActive ? '1' : '0');
+  gwApplyMode();
+}
+ 
+function gwApplyMode(){
+  document.body.classList.toggle('grid-mode', gwModeActive);
+  const btn = document.getElementById('grid-mode-btn');
+  if(btn) btn.classList.toggle('gmact', gwModeActive);
+  if(gwModeActive){
+    gwApplyLayout();
+    gwApplyEditUI();
+    gwSyncAll();
+  }
+}
+ 
+// ── SYNC DATA INTO GRID WIDGETS ───────────────────────────────────────────────
+// Mirrors data from the existing DOM into the grid widgets
+ 
+function gwSyncAll(){
+  if(!gwModeActive) return;
+  gwSyncQueuing();
+  gwSyncSchedule();
+  gwSyncRankings();
+  gwSyncTeam();
+  gwSyncAlerts();
+  gwSyncUpcoming();
+  gwSyncBumper();
+  gwSyncStream();
+}
+ 
+function gwSyncQueuing(){
+  const src = document.getElementById('q-display');
+  const dst = document.getElementById('gw-queuing-scroll');
+  if(src && dst){
+    dst.innerHTML = src.innerHTML;
+    // Also show bumper color in queuing widget
+    const bumperSrc = document.getElementById('bumper-box');
+    if(bumperSrc){
+      const bumperClone = bumperSrc.cloneNode(true);
+      bumperClone.id = '';
+      dst.appendChild(bumperClone);
+    }
+  }
+}
+ 
+function gwSyncSchedule(){
+  const src = document.getElementById('ml');
+  const dst = document.getElementById('gw-ml');
+  if(src && dst) dst.innerHTML = src.innerHTML;
+}
+ 
+function gwSyncRankings(){
+  const src = document.getElementById('rank-content');
+  const dst = document.getElementById('gw-rankings-scroll');
+  if(src && dst){
+    dst.innerHTML = '<div style="font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim);padding:0 0 6px;border-bottom:2px solid var(--border);margin-bottom:8px">Event Rankings</div>' + src.innerHTML;
+    makeTeamsClickable(dst);
+  }
+}
+ 
+function gwSyncTeam(){
+  const src = document.getElementById('team-content');
+  const dst = document.getElementById('gw-team-scroll');
+  if(src && dst) dst.innerHTML = src.innerHTML;
+}
+ 
+function gwSyncAlerts(){
+  const ann   = document.getElementById('ann-content');
+  const parts = document.getElementById('parts-content');
+  const dst   = document.getElementById('gw-alerts-scroll');
+  if(dst){
+    dst.innerHTML = 
+      '<div style="font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim);padding:0 0 5px;border-bottom:2px solid var(--border);margin-bottom:7px">Announcements</div>' +
+      (ann ? ann.innerHTML : '') +
+      '<div style="font-family:var(--fd);font-size:var(--fs-sm);font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim);padding:6px 0 5px;border-bottom:2px solid var(--border);margin-bottom:7px;margin-top:8px">Parts Requests</div>' +
+      (parts ? parts.innerHTML : '');
+  }
+}
+ 
+function gwSyncUpcoming(){
+  const src = document.getElementById('upcoming-content');
+  const dst = document.getElementById('gw-upcoming-scroll');
+  if(src && dst) dst.innerHTML = src.innerHTML;
+}
+ 
+function gwSyncBumper(){
+  const src = document.getElementById('bumper-box');
+  const dst = document.getElementById('gw-bumper-scroll');
+  if(src && dst){
+    dst.innerHTML = '';
+    const clone = src.cloneNode(true);
+    clone.id = 'gw-bumper-box';
+    clone.style.cssText = 'margin:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:clamp(1.2rem,3vw,2.5rem);border-radius:0;border:none';
+    dst.appendChild(clone);
+  }
+}
+ 
+function gwSyncStream(){
+  // Mirror the iframe stream into the grid stream widget
+  const srcIframe = document.getElementById('s-iframe');
+  const srcNowc   = document.getElementById('s-nowc');
+  const inner     = document.getElementById('gw-stream-inner');
+  if(!inner) return;
+ 
+  // Stream bar (controls)
+  const srcBar = document.querySelector('.stream-bar');
+  let barHtml = '';
+  if(srcBar) barHtml = `<div style="flex-shrink:0;background:var(--surface);border-bottom:2px solid var(--border);padding:5px 8px;display:flex;align-items:center;gap:8px;font-family:var(--fd);font-size:var(--fs-sm);color:var(--text-dim)">${srcBar.innerHTML}</div>`;
+ 
+  if(srcIframe && srcIframe.src && !srcNowc?.style.display?.includes('flex')){
+    inner.innerHTML = barHtml + `<div style="flex:1;position:relative;min-height:0"><iframe src="${srcIframe.src}" style="position:absolute;inset:0;width:100%;height:100%;border:none" allowfullscreen allow="autoplay;encrypted-media"></iframe></div>`;
+  } else {
+    inner.innerHTML = barHtml + `<div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:var(--fs-sm)">No livestream found for this event</div>`;
+  }
+}
+ 
+// ── WIRE UP HANDLE EVENTS ─────────────────────────────────────────────────────
+function gwWireHandles(){
+  GW_WIDGETS.forEach(({id})=>{
+    const el     = document.getElementById('gw-'+id);
+    const handle = el?.querySelector('.gw-handle');
+    const resize = el?.querySelector('.gw-resize');
+    if(handle){
+      handle.addEventListener('mousedown',  e=>gwStartDrag(e,id));
+      handle.addEventListener('touchstart', e=>gwStartDrag(e,id), {passive:false});
+    }
+    if(resize){
+      resize.addEventListener('mousedown',  e=>gwStartResize(e,id));
+      resize.addEventListener('touchstart', e=>gwStartResize(e,id), {passive:false});
+    }
+  });
+}
+ 
+// ── INIT DEFAULT LAYOUT (first time) ─────────────────────────────────────────
+function gwInitDefaultLayout(){
+  const hasLayout = Object.keys(gwLayout).length > 0;
+  if(!hasLayout){
+    // Load quals preset as default
+    gwLoadPreset('quals');
+  }
+}
+ 
+// ── RESIZE OBSERVER ───────────────────────────────────────────────────────────
+if(typeof ResizeObserver !== 'undefined'){
+  const ro = new ResizeObserver(()=>{ if(gwModeActive) gwApplyLayout(); });
+  const canvas = document.getElementById('grid-canvas');
+  if(canvas) ro.observe(canvas);
+}
+window.addEventListener('resize', ()=>{ if(gwModeActive){ gwApplyLayout(); if(bracketView) setStreamHeight(); }});
+ 
+// ── HOOK INTO EXISTING RENDER FUNCTIONS ───────────────────────────────────────
+// Patch the existing render functions to also update grid widgets
+// We do this by wrapping them after they're defined
+document.addEventListener('DOMContentLoaded', ()=>{
+  gwWireHandles();
+  gwInitDefaultLayout();
+  gwApplyMode();
+  gwApplyEditUI();
+ 
+  // If grid mode was active last session, sync data on first load
+  if(gwModeActive){
+    // Data isn't loaded yet — wait for init() to complete
+    const origRenderAll = typeof renderAll === 'function' ? renderAll : null;
+    if(origRenderAll){
+      const _orig = origRenderAll;
+      window.renderAll = function(){
+        _orig();
+        gwSyncAll();
+      };
+    }
+  }
+});
+ 
+// Patch individual render functions so grid always stays in sync
+(function patchRenders(){
+  const origRQ   = typeof rQ   === 'function' ? rQ   : null;
+  const origRMl  = typeof rMl  === 'function' ? rMl  : null;
+  const origRRnk = typeof rRank === 'function' ? rRank : null;
+  const origRTm  = typeof rTeam === 'function' ? rTeam : null;
+  const origRAl  = typeof rAlerts === 'function' ? rAlerts : null;
+  const origRUp  = typeof rUpcoming === 'function' ? rUpcoming : null;
+  const origUBB  = typeof updateBumperBox === 'function' ? updateBumperBox : null;
+ 
+  if(origRQ)   window.rQ   = function(){ origRQ();   if(gwModeActive){ gwSyncQueuing(); gwSyncBumper(); }};
+  if(origRMl)  window.rMl  = function(){ origRMl();  if(gwModeActive) gwSyncSchedule(); };
+  if(origRRnk) window.rRank = function(){ origRRnk(); if(gwModeActive) gwSyncRankings(); };
+  if(origRTm)  window.rTeam = function(){ origRTm();  if(gwModeActive) gwSyncTeam(); };
+  if(origRAl)  window.rAlerts = function(){ origRAl(); if(gwModeActive) gwSyncAlerts(); };
+  if(origRUp)  window.rUpcoming = function(){ origRUp(); if(gwModeActive) gwSyncUpcoming(); };
+  if(origUBB)  window.updateBumperBox = function(){ origUBB(); if(gwModeActive){ gwSyncBumper(); gwSyncQueuing(); }};
+})();
+ 
+// ── ADD GRID MODE BUTTON TO HEADER ────────────────────────────────────────────
+// (Fallback: inject it if not manually added to HTML)
+document.addEventListener('DOMContentLoaded', ()=>{
+  if(!document.getElementById('grid-mode-btn')){
+    const hdrR = document.querySelector('.hdr-r');
+    if(hdrR){
+      const btn = document.createElement('button');
+      btn.id = 'grid-mode-btn';
+      btn.textContent = '⊞ Layout';
+      btn.title = 'Toggle grid layout mode';
+      btn.onclick = toggleGridMode;
+      hdrR.insertBefore(btn, hdrR.firstChild);
+    }
+  }
+});
+</script>
 </script>
 </body>
 </html>
