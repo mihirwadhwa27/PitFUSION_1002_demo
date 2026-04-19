@@ -1097,9 +1097,6 @@ body.pit-xl .rt th{ font-size:var(--fs-pit) !important; }
 [data-theme="tj2"] #pitmap-overlay .epa-hdr{background:#0d1e38;border-color:rgba(255,255,255,0.15)}
 [data-theme="tj2"] #pitmap-overlay .epa-title{color:#ffffff}
 [data-theme="tj2"] #pitmap-overlay .epa-team-num{color:#7ec8ff}
-<!-- ============================================================
-     BLOCK A — paste before </style>
-     ============================================================ -->
 <style id="BLOCK_A_PASTE_BEFORE_STYLE_CLOSE">
 /* ── GRID LAYOUT SYSTEM ── */
 body.grid-mode #body-row{display:none!important}
@@ -1166,7 +1163,144 @@ body.grid-edit .gw:not(.gw-dragging):hover{border-color:var(--accent);box-shadow
 </style>
 </head>
 <body>
-
+<!-- ============================================================
+     BLOCK B — paste before <!-- SETUP PAGE --> comment
+     ============================================================ -->
+ 
+<!-- GRID CANVAS -->
+<div id="grid-canvas">
+  <canvas id="grid-overlay"></canvas>
+  <div id="grid-drop-preview"></div>
+ 
+  <!-- WIDGET: Stream -->
+  <div class="gw gw-stream" id="gw-stream">
+    <div class="gw-handle" data-wid="stream">
+      <span class="gw-handle-icon">📺</span>
+      <span class="gw-handle-title">Stream</span>
+      <button class="gw-hide-btn" onclick="gwHide('stream')" title="Hide">✕</button>
+    </div>
+    <div class="gw-body">
+      <div class="gw-scroll" style="padding:0;height:100%">
+        <div id="gw-stream-inner" style="width:100%;height:100%;background:#000;display:flex;flex-direction:column">
+          <!-- populated by gwSyncStream() -->
+        </div>
+      </div>
+    </div>
+    <div class="gw-resize" data-wid="stream"></div>
+  </div>
+ 
+  <!-- WIDGET: Queuing -->
+  <div class="gw" id="gw-queuing">
+    <div class="gw-handle" data-wid="queuing">
+      <span class="gw-handle-icon">⚡</span>
+      <span class="gw-handle-title">Queuing</span>
+      <button class="gw-hide-btn" onclick="gwHide('queuing')" title="Hide">✕</button>
+    </div>
+    <div class="gw-body">
+      <div class="gw-scroll" id="gw-queuing-scroll"></div>
+    </div>
+    <div class="gw-resize" data-wid="queuing"></div>
+  </div>
+ 
+  <!-- WIDGET: Match Schedule -->
+  <div class="gw" id="gw-schedule">
+    <div class="gw-handle" data-wid="schedule">
+      <span class="gw-handle-icon">📋</span>
+      <span class="gw-handle-title">Match Schedule</span>
+      <button class="gw-hide-btn" onclick="gwHide('schedule')" title="Hide">✕</button>
+    </div>
+    <div class="gw-body">
+      <div class="gw-scroll" id="gw-schedule-scroll">
+        <div class="ml" id="gw-ml" style="padding:0;gap:4px"></div>
+        <div id="gw-bracket-panel" style="display:none"></div>
+      </div>
+    </div>
+    <div class="gw-resize" data-wid="schedule"></div>
+  </div>
+ 
+  <!-- WIDGET: Rankings -->
+  <div class="gw" id="gw-rankings">
+    <div class="gw-handle" data-wid="rankings">
+      <span class="gw-handle-icon">🏅</span>
+      <span class="gw-handle-title">Rankings</span>
+      <button class="gw-hide-btn" onclick="gwHide('rankings')" title="Hide">✕</button>
+    </div>
+    <div class="gw-body">
+      <div class="gw-scroll" id="gw-rankings-scroll"></div>
+    </div>
+    <div class="gw-resize" data-wid="rankings"></div>
+  </div>
+ 
+  <!-- WIDGET: My Team -->
+  <div class="gw" id="gw-team">
+    <div class="gw-handle" data-wid="team">
+      <span class="gw-handle-icon">🤖</span>
+      <span class="gw-handle-title">My Team</span>
+      <button class="gw-hide-btn" onclick="gwHide('team')" title="Hide">✕</button>
+    </div>
+    <div class="gw-body">
+      <div class="gw-scroll" id="gw-team-scroll"></div>
+    </div>
+    <div class="gw-resize" data-wid="team"></div>
+  </div>
+ 
+  <!-- WIDGET: Alerts -->
+  <div class="gw" id="gw-alerts">
+    <div class="gw-handle" data-wid="alerts">
+      <span class="gw-handle-icon">🔔</span>
+      <span class="gw-handle-title">Alerts</span>
+      <button class="gw-hide-btn" onclick="gwHide('alerts')" title="Hide">✕</button>
+    </div>
+    <div class="gw-body">
+      <div class="gw-scroll" id="gw-alerts-scroll"></div>
+    </div>
+    <div class="gw-resize" data-wid="alerts"></div>
+  </div>
+ 
+  <!-- WIDGET: Upcoming -->
+  <div class="gw" id="gw-upcoming">
+    <div class="gw-handle" data-wid="upcoming">
+      <span class="gw-handle-icon">🔜</span>
+      <span class="gw-handle-title">Upcoming</span>
+      <button class="gw-hide-btn" onclick="gwHide('upcoming')" title="Hide">✕</button>
+    </div>
+    <div class="gw-body">
+      <div class="gw-scroll" id="gw-upcoming-scroll"></div>
+    </div>
+    <div class="gw-resize" data-wid="upcoming"></div>
+  </div>
+ 
+  <!-- WIDGET: Bumper Color -->
+  <div class="gw" id="gw-bumper">
+    <div class="gw-handle" data-wid="bumper">
+      <span class="gw-handle-icon">🎨</span>
+      <span class="gw-handle-title">Bumper Color</span>
+      <button class="gw-hide-btn" onclick="gwHide('bumper')" title="Hide">✕</button>
+    </div>
+    <div class="gw-body">
+      <div class="gw-scroll" id="gw-bumper-scroll" style="display:flex;align-items:center;justify-content:center;padding:0"></div>
+    </div>
+    <div class="gw-resize" data-wid="bumper"></div>
+  </div>
+ 
+</div><!-- /grid-canvas -->
+ 
+<!-- Widget visibility panel -->
+<div id="widget-panel">
+  <div class="wp-title">Widgets</div>
+  <!-- populated by JS -->
+</div>
+ 
+<!-- Grid settings panel -->
+<div id="grid-cfg">
+  <label>Columns</label>
+  <input type="range" id="cfg-cols" min="6" max="24" step="1" oninput="gwUpdateCfg()">
+  <span id="cfg-cols-val">12</span>
+  <label style="margin-left:8px">Rows</label>
+  <input type="range" id="cfg-rows" min="6" max="30" step="1" oninput="gwUpdateCfg()">
+  <span id="cfg-rows-val">20</span>
+  <button class="layout-btn" onclick="document.getElementById('grid-cfg').classList.remove('show')" style="margin-left:8px">Done</button>
+</div>
 <!-- SETUP PAGE -->
 <div id="setup-page">
   <div class="setup-card">
